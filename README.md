@@ -13,3 +13,4 @@ IaC using:
 |-----------------------------------|---------------------------------|
 | [Day 1](terraform/day1/README.md) | Networking                      |
 | [Day 2](terraform/day2/README.md) | ECS with EC2 on-demand and spot |
+| [Day 2](terraform/day3/README.md) | ECS demo application            |
