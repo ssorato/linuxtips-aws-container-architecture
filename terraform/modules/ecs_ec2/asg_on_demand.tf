@@ -33,7 +33,7 @@ resource "aws_autoscaling_group" "on_demand" {
 
   lifecycle {
     ignore_changes = [
-      desired_capacity
+      desired_capacity # do not apply new desired_capacity
     ]
   }
 
