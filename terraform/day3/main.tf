@@ -27,7 +27,7 @@ module "ecs_app" {
     port      = 8080
     cpu       = 256
     memory_mb = 512
-    ecs_name  = "cluster-ecs-linuxtips"
+    ecs_name  = "ecs-linuxtips"
   }
 
 }
