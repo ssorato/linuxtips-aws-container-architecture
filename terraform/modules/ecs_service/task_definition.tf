@@ -14,7 +14,7 @@ resource "aws_ecs_task_definition" "main" {
   # Using the same cpu and memory size in the task definition as we are only using one container
   container_definitions = jsonencode([
     {
-      name = var.ecs_service_name
+      name   = var.ecs_service_name
       image  = format("%s:latest", aws_ecr_repository.main.repository_url)
       cpu    = var.ecs_service_cpu
       memory = var.ecs_service_memory_mb
@@ -38,17 +38,8 @@ resource "aws_ecs_task_definition" "main" {
         }
       }
 
-      # mountPoints = [
-      #   for volume in var.efs_volumes : {
-      #     sourceVolume  = volume.volume_name
-      #     containerPath = volume.mount_point
-      #     readOnly      = volume.read_only
-      #   }
-      # ]
-
       environment = var.environment_variables
 
-      # secrets = var.secrets
     }
   ])
 

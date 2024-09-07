@@ -24,13 +24,25 @@ module "ecs_app" {
   ssm_alb_listener_arn = "/linuxtips/ecs/lb/listerner_arn"
 
   ecs_service = {
-    name      = "chip"
-    port      = 8080
-    cpu       = 256
-    memory_mb = 512
-    ecs_name  = "ecs-linuxtips"
+    name                  = "chip"
+    port                  = 8080
+    cpu                   = 256
+    memory_mb             = 512
+    ecs_name              = "ecs-linuxtips"
     environment_variables = []
-    capabilities = ["EC2"]
+    capabilities          = ["EC2"]
+    service_healthcheck = {
+      healthy_threshold   = 3
+      unhealthy_threshold = 10
+      timeout             = 10
+      interval            = 60
+      matcher             = "200-399"
+      path                = "/healthcheck"
+      port                = 8080
+    }
+    service_launch_type = "EC2"
+    service_task_count  = 1
+    service_hosts       = ["linuxtips.mydomain.fake"]
   }
 
 }

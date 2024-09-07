@@ -28,10 +28,14 @@ variable "ecs_service" {
     memory_mb = number
     ecs_name  = string
     environment_variables = list(object({
-    name : string
-    value : string
-  }))
-    capabilities = list(string)
+      name : string
+      value : string
+    }))
+    capabilities        = list(string)
+    service_healthcheck = map(any)
+    service_launch_type = string
+    service_task_count  = number
+    service_hosts       = list(string)
   })
   description = "ECS service"
 }

@@ -76,3 +76,28 @@ variable "capabilities" {
   description = "Capacity list like EC2 or FARGATE"
   default     = []
 }
+
+variable "service_healthcheck" {
+  type        = map(any)
+  description = "ECS service healthcheck parameters"
+}
+
+variable "service_launch_type" {
+  type        = string
+  description = "Launch Types about capacity providers available in the cluster"
+}
+
+variable "service_task_count" {
+  type        = number
+  description = "Amount of tasks in the service"
+}
+
+variable "service_hosts" {
+  type        = list(string)
+  description = "Hosts associated to the service ( dns name )"
+}
+
+variable "service_listener_arn" {
+  type        = string
+  description = "ALB listner arn used by the ECS service"
+}

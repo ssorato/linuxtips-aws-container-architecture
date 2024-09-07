@@ -28,3 +28,15 @@ $ terraform apply -var-file=enviroment/dev/terraform.tfvars
 
 Note: after create the ECR build the image, using the name `cluster-ecs-linuxtips/chip`, about the [app](../../app/) and push into the ECR after change the tag ( the tag is the `aws_ecr_repository.main.repository_url` )
 
+Testing the application:
+```bash
+$ export ALB_DNS=<your alb dns name>
+$ % curl -s -i $ALB_DNS/version -H "Host: linuxtips.mydomain.fake"
+HTTP/1.1 200 OK
+Date: Sat, 07 Sep 2024 21:31:50 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 2
+Connection: keep-alive
+
+v7
+```
