@@ -95,16 +95,16 @@ variable "ecs" {
     node_instance_type  = string
     node_volume_size_gb = number
     node_volume_type    = optional(string, "gp3")
-    on_demand           = object({
-      desired_size        = number
-      min_size            = number
-      max_size            = number
+    on_demand = object({
+      desired_size = number
+      min_size     = number
+      max_size     = number
     })
-    spot                = object({
-      desired_size        = number
-      min_size            = number
-      max_size            = number
-      max_price           = string
+    spot = object({
+      desired_size = number
+      min_size     = number
+      max_size     = number
+      max_price    = string
     })
   })
   description = "ECS sizing"

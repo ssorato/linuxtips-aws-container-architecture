@@ -13,13 +13,13 @@ resource "aws_ssm_parameter" "vpc" {
 
 resource "aws_ssm_parameter" "private_subnets" {
   count = length(aws_subnet.private_subnet)
-  name  = format("/%s/vpc/subnet_private_%s_id", var.project_name, replace(aws_subnet.private_subnet[count.index].availability_zone,"-","_"))
+  name  = format("/%s/vpc/subnet_private_%s_id", var.project_name, replace(aws_subnet.private_subnet[count.index].availability_zone, "-", "_"))
   type  = "String"
   value = aws_subnet.private_subnet[count.index].id
 
   tags = merge(
     {
-      Name = format("/%s/vpc/subnet_private_%s_id", var.project_name, replace(aws_subnet.private_subnet[count.index].availability_zone,"-","_"))
+      Name = format("/%s/vpc/subnet_private_%s_id", var.project_name, replace(aws_subnet.private_subnet[count.index].availability_zone, "-", "_"))
     },
     var.common_tags
   )
@@ -27,13 +27,13 @@ resource "aws_ssm_parameter" "private_subnets" {
 
 resource "aws_ssm_parameter" "public_subnets" {
   count = length(aws_subnet.public_subnet)
-  name  = format("/%s/vpc/subnet_public_%s_id", var.project_name, replace(aws_subnet.public_subnet[count.index].availability_zone,"-","_"))
+  name  = format("/%s/vpc/subnet_public_%s_id", var.project_name, replace(aws_subnet.public_subnet[count.index].availability_zone, "-", "_"))
   type  = "String"
   value = aws_subnet.public_subnet[count.index].id
 
   tags = merge(
     {
-      Name = format("/%s/vpc/subnet_public_%s_id", var.project_name, replace(aws_subnet.public_subnet[count.index].availability_zone,"-","_"))
+      Name = format("/%s/vpc/subnet_public_%s_id", var.project_name, replace(aws_subnet.public_subnet[count.index].availability_zone, "-", "_"))
     },
     var.common_tags
   )
@@ -41,13 +41,13 @@ resource "aws_ssm_parameter" "public_subnets" {
 
 resource "aws_ssm_parameter" "database_subnets" {
   count = length(aws_subnet.database_subnet)
-  name  = format("/%s/vpc/subnet_database_%s_id", var.project_name, replace(aws_subnet.database_subnet[count.index].availability_zone,"-","_"))
+  name  = format("/%s/vpc/subnet_database_%s_id", var.project_name, replace(aws_subnet.database_subnet[count.index].availability_zone, "-", "_"))
   type  = "String"
   value = aws_subnet.database_subnet[count.index].id
 
   tags = merge(
     {
-      Name = format("/%s/vpc/subnet_database_%s_id", var.project_name, replace(aws_subnet.database_subnet[count.index].availability_zone,"-","_"))
+      Name = format("/%s/vpc/subnet_database_%s_id", var.project_name, replace(aws_subnet.database_subnet[count.index].availability_zone, "-", "_"))
     },
     var.common_tags
   )

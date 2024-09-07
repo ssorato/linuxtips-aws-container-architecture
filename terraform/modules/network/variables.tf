@@ -1,10 +1,10 @@
 variable "common_tags" {
-  type          = map(string)
-  description   = "Common tags"
-  default       = {
-    created_by  = "terraform-linuxtips-aws-container-architecture"
-    sandbox     = "linuxtips"
-    day         = "day1"
+  type        = map(string)
+  description = "Common tags"
+  default = {
+    created_by = "terraform-linuxtips-aws-container-architecture"
+    sandbox    = "linuxtips"
+    day        = "day1"
   }
 }
 
@@ -33,7 +33,7 @@ variable "vpc_cidr" {
 variable "private_subnet_cidr" {
   type        = list(string)
   description = "The private subnet CIDR"
-  default     = ["10.0.0.0/20","10.0.16.0/20","10.0.32.0/20"]
+  default     = ["10.0.0.0/20", "10.0.16.0/20", "10.0.32.0/20"]
   validation {
     condition = length(var.private_subnet_cidr) > 0 && alltrue([
       for cidr in var.private_subnet_cidr : can(cidrhost(cidr, 0))
@@ -45,7 +45,7 @@ variable "private_subnet_cidr" {
 variable "public_subnet_cidr" {
   type        = list(string)
   description = "The public subnet CIDR"
-  default     = ["10.0.48.0/24","10.0.49.0/24","10.0.50.0/24"]
+  default     = ["10.0.48.0/24", "10.0.49.0/24", "10.0.50.0/24"]
   validation {
     condition = length(var.public_subnet_cidr) > 0 && alltrue([
       for cidr in var.public_subnet_cidr : can(cidrhost(cidr, 0))
@@ -57,7 +57,7 @@ variable "public_subnet_cidr" {
 variable "databases_subnet_cidr" {
   type        = list(string)
   description = "The databases subnet CIDR"
-  default     = ["10.0.51.0/24","10.0.52.0/24","10.0.53.0/24"]
+  default     = ["10.0.51.0/24", "10.0.52.0/24", "10.0.53.0/24"]
   validation {
     condition = length(var.databases_subnet_cidr) > 0 && alltrue([
       for cidr in var.databases_subnet_cidr : can(cidrhost(cidr, 0))

@@ -26,19 +26,19 @@ resource "aws_route_table" "private_internet_access" {
 }
 
 resource "aws_route" "private_access" {
-  route_table_id          = aws_route_table.private_internet_access.id
-  destination_cidr_block  = "0.0.0.0/0"
-  gateway_id              = aws_nat_gateway.natgw.id
+  route_table_id         = aws_route_table.private_internet_access.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_nat_gateway.natgw.id
 }
 
 resource "aws_route_table_association" "private" {
-  count = length(var.private_subnet_cidr)
+  count          = length(var.private_subnet_cidr)
   route_table_id = aws_route_table.private_internet_access.id
   subnet_id      = aws_subnet.private_subnet[count.index].id
 }
 
 resource "aws_subnet" "public_subnet" {
-  count = length(var.public_subnet_cidr)
+  count                   = length(var.public_subnet_cidr)
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.public_subnet_cidr[count.index]
   availability_zone       = data.aws_availability_zones.region_azones.names[count.index]
@@ -64,9 +64,9 @@ resource "aws_route_table" "public_internet_access" {
 }
 
 resource "aws_route" "public_access" {
-  route_table_id          = aws_route_table.public_internet_access.id
-  destination_cidr_block  = "0.0.0.0/0"
-  gateway_id              = aws_internet_gateway.igw.id
+  route_table_id         = aws_route_table.public_internet_access.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.igw.id
 }
 
 resource "aws_route_table_association" "public" {
@@ -78,7 +78,7 @@ resource "aws_route_table_association" "public" {
 
 
 resource "aws_subnet" "database_subnet" {
-  count = length(var.databases_subnet_cidr)
+  count                   = length(var.databases_subnet_cidr)
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.databases_subnet_cidr[count.index]
   availability_zone       = data.aws_availability_zones.region_azones.names[count.index]
