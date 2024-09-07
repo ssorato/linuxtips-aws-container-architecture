@@ -18,15 +18,15 @@ module "ecs_ec2" {
     node_volume_size_gb = 30
     node_volume_type    = "gp3"
     on_demand = {
-      desired_size        = 2
-      min_size            = 1
-      max_size            = 3
+      desired_size = 2
+      min_size     = 1
+      max_size     = 3
     }
     spot = {
-      desired_size        = 2
-      min_size            = 1
-      max_size            = 3
-      max_price           = "0.15"
+      desired_size = 2
+      min_size     = 1
+      max_size     = 3
+      max_price    = "0.15"
     }
   }
 }
