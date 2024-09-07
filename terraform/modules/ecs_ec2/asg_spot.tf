@@ -79,6 +79,6 @@ resource "aws_launch_template" "spot" {
   }
 
   user_data = base64encode(templatefile("${path.module}/templates/user-data.tpl", {
-    CLUSTER_NAME = var.project_name
+    CLUSTER_NAME = format("ecs-%s", var.project_name)
   }))
 }

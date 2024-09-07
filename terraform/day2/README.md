@@ -32,3 +32,12 @@ Show sensitive values in plan:
 $ terraform plan -var-file=enviroment/dev/terraform.tfvars -out=tfplan
 $ terraform show -json tfplan | jq
 ```
+
+Get AMI for ECS containers:
+
+```bash
+$ aws ssm get-parameters \
+    --names /aws/service/ecs/optimized-ami/amazon-linux-2/recommended
+```
+
+See also [Calling the ECS optimized AMI public parameter](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-public-parameters-ecs.html)

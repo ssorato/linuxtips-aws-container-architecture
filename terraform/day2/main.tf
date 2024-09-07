@@ -14,7 +14,7 @@ module "ecs_ec2" {
   project_name             = "linuxtips"
   alb_ingress_cidr_enabled = ["${chomp(data.http.my_public_ip.response_body)}/32"] # limit access to the ALB from my public ip
   ecs = {
-    nodes_ami           = "ami-0dc67873410203528"
+    nodes_ami           = "ami-09d3335e2eaf06692"
     node_instance_type  = "t3a.small" # 2 vCPU 2 GiB
     node_volume_size_gb = 30
     node_volume_type    = "gp3"
