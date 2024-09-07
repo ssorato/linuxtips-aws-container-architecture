@@ -8,6 +8,7 @@ module "ecs_ec2" {
   common_tags = {
     created_by = "terraform-linuxtips-aws-container-architecture"
     sandbox    = "linuxtips"
+    day        = "day2"
   }
   aws_region               = var.aws_region
   project_name             = "linuxtips"

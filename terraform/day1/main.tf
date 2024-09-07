@@ -4,6 +4,7 @@ module "network" {
   common_tags = {
     created_by = "terraform-linuxtips-aws-container-architecture"
     sandbox    = "linuxtips"
+    day        = "day1"
   }
   aws_region            = var.aws_region
   project_name          = "linuxtips"
