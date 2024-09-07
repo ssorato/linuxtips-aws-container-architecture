@@ -1,23 +1,16 @@
 variable "common_tags" {
   type        = map(string)
   description = "Common tags"
-  default = {
-    created_by = "terraform-linuxtips-aws-container-architecture"
-    sandbox    = "linuxtips"
-    day        = "day3"
-  }
 }
 
 variable "project_name" {
   type        = string
   description = "The resource name sufix"
-  default     = "linuxtips"
 }
 
 variable "aws_region" {
   type        = string
   description = "The AWS region"
-  default     = "us-east-1"
 }
 
 variable "ecs_service_name" {
@@ -67,4 +60,19 @@ variable "alb_listener_arn" {
 variable "service_task_execution_role_arn" {
   type        = string
   description = "The IAM task execution role arn"
+}
+
+variable "environment_variables" {
+  type = list(object({
+    name : string
+    value : string
+  }))
+  description = "Environment variables used by ECS service"
+  default     = []
+}
+
+variable "capabilities" {
+  type        = list(string)
+  description = "Capacity list like EC2 or FARGATE"
+  default     = []
 }

@@ -27,6 +27,11 @@ variable "ecs_service" {
     cpu       = number
     memory_mb = number
     ecs_name  = string
+    environment_variables = list(object({
+    name : string
+    value : string
+  }))
+    capabilities = list(string)
   })
   description = "ECS service"
 }

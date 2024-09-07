@@ -5,6 +5,7 @@ Requirements:
 * the [day 1](../day1/README.md) network infrastructure.
 * the [day 2](../day2/README.md) ECS infrastructure.
 
+
 Create the files:
 * `enviroment/dev/backend.tfvars`:
   ```tf
@@ -24,3 +25,6 @@ $ terraform validate
 $ terraform plan -var-file=enviroment/dev/terraform.tfvars
 $ terraform apply -var-file=enviroment/dev/terraform.tfvars
 ```
+
+Note: after create the ECR build the image, using the name `cluster-ecs-linuxtips/chip`, about the [app](../../app/) and push into the ECR after change the tag ( the tag is the `aws_ecr_repository.main.repository_url` )
+

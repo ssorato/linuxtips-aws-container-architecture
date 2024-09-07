@@ -10,4 +10,9 @@ module "ecs_app" {
   private_subnets                 = data.aws_ssm_parameter.private_subnet[*].value
   alb_listener_arn                = data.aws_ssm_parameter.alb_listener_arn.value
   service_task_execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
+  environment_variables = var.ecs_service.environment_variables
+  capabilities = var.ecs_service.capabilities
+  common_tags = var.common_tags
+  project_name = var.project_name
+  aws_region = var.aws_region
 }

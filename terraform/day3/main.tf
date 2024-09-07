@@ -8,6 +8,7 @@ module "ecs_app" {
   common_tags = {
     created_by = "terraform-linuxtips-aws-container-architecture"
     sandbox    = "linuxtips"
+    day        = "day3"
   }
   aws_region   = var.aws_region
   project_name = "linuxtips"
@@ -28,6 +29,8 @@ module "ecs_app" {
     cpu       = 256
     memory_mb = 512
     ecs_name  = "ecs-linuxtips"
+    environment_variables = []
+    capabilities = ["EC2"]
   }
 
 }
