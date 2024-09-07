@@ -64,31 +64,6 @@ variable "alb_ingress_cidr_enabled" {
   }
 }
 
-# variable "ecs_on_demand" {
-#   type = object({
-#     desired_size        = number
-#     min_size            = number
-#     max_size            = number
-#     nodes_ami           = string
-#     node_instance_type  = string
-#     node_volume_size_gb = number
-#     node_volume_type    = optional(string, "gp3")
-#   })
-#   description = "ECS on-demand ec2 sizing"
-# }
-
-# variable "ecs_spot" {
-#   type = object({
-#     desired_size        = number
-#     min_size            = number
-#     max_size            = number
-#     nodes_ami           = string
-#     node_instance_type  = string
-#     max_price           = string
-#   })
-#   description = "ECS spot ec2 sizing"
-# }
-
 variable "ecs" {
   type = object({
     nodes_ami           = string
