@@ -12,4 +12,4 @@ IaC using:
 | Day                               | Topic of the day                |
 |-----------------------------------|---------------------------------|
 | [Day 1](terraform/day1/README.md) | Networking                      |
-
+| [Day 2](terraform/day2/README.md) | ECS with EC2 on-demand and spot |
