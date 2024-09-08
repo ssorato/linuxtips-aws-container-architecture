@@ -1,5 +1,5 @@
 module "network" {
-  source = "../modules/network"
+  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//network?ref=day1"
 
   common_tags = {
     created_by = "terraform-linuxtips-aws-container-architecture"

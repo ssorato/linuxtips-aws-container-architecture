@@ -19,9 +19,3 @@ $ terraform validate
 $ terraform plan -var-file=enviroment/dev/terraform.tfvars
 $ terraform apply -var-file=enviroment/dev/terraform.tfvars
 ```
-
-Tip: show resource with count
-
-```bash
-$ terraform state show 'module.network.aws_route_table_association.private[0]'
-```

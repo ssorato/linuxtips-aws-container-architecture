@@ -3,7 +3,7 @@ data "http" "my_public_ip" {
 }
 
 module "ecs_app" {
-  source = "../modules/ecs_app"
+  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//ecs_app?ref=day3"
 
   common_tags = {
     created_by = "terraform-linuxtips-aws-container-architecture"

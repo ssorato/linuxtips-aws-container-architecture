@@ -3,7 +3,7 @@ data "http" "my_public_ip" {
 }
 
 module "ecs_ec2" {
-  source = "../modules/ecs_ec2"
+  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//ecs_ec2?ref=day2"
 
   common_tags = {
     created_by = "terraform-linuxtips-aws-container-architecture"
@@ -27,7 +27,7 @@ module "ecs_ec2" {
       desired_size = 2
       min_size     = 1
       max_size     = 3
-      max_price    = "0.02"
+      max_price    = "0.01"
     }
   }
 }
