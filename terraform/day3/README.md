@@ -26,7 +26,7 @@ $ terraform plan -var-file=enviroment/dev/terraform.tfvars
 $ terraform apply -var-file=enviroment/dev/terraform.tfvars
 ```
 
-Login into the ECR and reate the image, then push to the ECR:
+Login into the ECR and create the image, then push to the ECR:
 
 ```bash
 $ export IMG=<yout acr uri>
