@@ -29,7 +29,7 @@ $ terraform apply -var-file=enviroment/dev/terraform.tfvars
 Login into the ECR and create the image, then push to the ECR:
 
 ```bash
-$ export IMG=<yout acr uri>
+$ export IMG=<your acr uri>
 $ docker build -t "$IMG":latest ../../app
 $ docker push "$IMG":latest
 ```
