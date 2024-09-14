@@ -1,4 +1,4 @@
-# Linuxtips course: ECS demo application
+# Linuxtips course: ECS demo application and autscaling
 
 Requirements:
 
@@ -46,14 +46,3 @@ Connection: keep-alive
 
 v7
 ```
-
-Cleanup:
-
-```bash
-$ terraform destroy -var-file=enviroment/dev/terraform.tfvars
-$ cd ../day2
-$ terraform destroy -var-file=enviroment/dev/terraform.tfvars
-$ cd ../day1
-$ terraform destroy -var-file=enviroment/dev/terraform.tfvars
-```
-

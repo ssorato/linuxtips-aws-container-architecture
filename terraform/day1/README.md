@@ -19,3 +19,9 @@ $ terraform validate
 $ terraform plan -var-file=enviroment/dev/terraform.tfvars
 $ terraform apply -var-file=enviroment/dev/terraform.tfvars
 ```
+
+Cleanup:
+
+```bash
+$ terraform destroy -var-file=enviroment/dev/terraform.tfvars
+```

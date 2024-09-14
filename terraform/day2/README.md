@@ -24,6 +24,14 @@ $ terraform plan -var-file=enviroment/dev/terraform.tfvars
 $ terraform apply -var-file=enviroment/dev/terraform.tfvars
 ```
 
+Cleanup:
+
+```bash
+$ terraform destroy -var-file=enviroment/dev/terraform.tfvars
+$ cd ../day1
+$ terraform destroy -var-file=enviroment/dev/terraform.tfvars
+```
+
 # Tip
 
 Show sensitive values in plan:
@@ -41,3 +49,4 @@ $ aws ssm get-parameters \
 ```
 
 See also [Calling the ECS optimized AMI public parameter](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-public-parameters-ecs.html)
+
