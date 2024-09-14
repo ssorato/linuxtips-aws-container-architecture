@@ -1,1 +1,4 @@
 .infracost
+.task
+.env
+Taskfile.yaml

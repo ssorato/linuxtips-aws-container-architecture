@@ -37,3 +37,27 @@ ecs_service = {
   service_task_count  = 1
   service_hosts       = ["linuxtips.mydomain.fake"]
 }
+
+common_scale = {
+  scale_type   = "cpu"
+  task_maximum = 7
+  task_minimum = 3
+  task_desired = 3
+  in_cooldown  = 60
+  out_cooldown = 60
+}
+
+cloudwatch_scale = {
+  out_statistic           = "Average"
+  out_cpu_threshold       = 50
+  out_adjustment          = 1
+  out_comparison_operator = "GreaterThanOrEqualToThreshold"
+  out_period              = 10
+  out_evaluation_periods  = 1
+  in_statistic            = "Average"
+  in_cpu_threshold        = 30
+  in_adjustment           = -1
+  in_comparison_operator  = "LessThanOrEqualToThreshold"
+  in_period               = 30
+  in_evaluation_periods   = 2
+}

@@ -3,7 +3,7 @@ data "http" "my_public_ip" {
 }
 
 module "ecs_app" {
-  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//ecs_app?ref=day3"
+  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//ecs_app?ref=day4"
 
   common_tags             = var.common_tags
   aws_region              = var.aws_region
@@ -12,5 +12,6 @@ module "ecs_app" {
   ssm_private_subnet_list = var.ssm_private_subnet_list
   ssm_alb_listener_arn    = var.ssm_alb_listener_arn
   ecs_service             = var.ecs_service
+  common_scale            = var.common_scale
+  cloudwatch_scale        = var.cloudwatch_scale
 }
-
