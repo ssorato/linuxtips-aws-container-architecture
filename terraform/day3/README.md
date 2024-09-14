@@ -30,7 +30,8 @@ Login into the ECR and create the image, then push to the ECR:
 
 ```bash
 $ export IMG=<your ecr uri>
-$ docker build -t "$IMG":latest ../../app
+$ docker pull fidelissauro/chip:latest
+$ docker tag fidelissauro/chip:latest "$IMG":latest
 $ docker push "$IMG":latest
 ```
 
@@ -44,7 +45,7 @@ Content-Type: text/plain; charset=utf-8
 Content-Length: 2
 Connection: keep-alive
 
-v7
+v2
 ```
 
 Cleanup:
