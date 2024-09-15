@@ -41,3 +41,5 @@ terraform.rc
 # Infracost
 .infracost
 
+# Samples
+day4/load_test/sample-k6.js

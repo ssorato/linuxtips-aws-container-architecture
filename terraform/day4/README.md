@@ -26,14 +26,9 @@ $ terraform plan -var-file=enviroment/dev/terraform.tfvars
 $ terraform apply -var-file=enviroment/dev/terraform.tfvars
 ```
 
-Login into the ECR and create the image, then push to the ECR:
+ECR image:
 
-```bash
-$ export IMG=<your ecr uri>
-$ docker pull fidelissauro/chip:latest
-$ docker tag fidelissauro/chip:latest "$IMG":latest
-$ docker push "$IMG":latest
-```
+We are using `fidelissauro/chip:latest`. The image is pushed to the ECR using terraform.
 
 Testing the application:
 ```bash
@@ -51,8 +46,9 @@ Connection: keep-alive
 Load test using [k6](https://k6.io/):
 
 ```bash
-$ k6 run -e MY_HOSTNAME=$ALB_DNS sample-k6.js  
+$ k6 run -e MY_HOSTNAME=$ALB_DNS load_test/autoscaling-cpu-k6.js
 ```
+see also [Monitor Amazon ECS using CloudWatch](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cloudwatch-metrics.html).
 
 Cleanup:
 
@@ -63,4 +59,3 @@ $ terraform destroy -var-file=enviroment/dev/terraform.tfvars
 $ cd ../day1
 $ terraform destroy -var-file=enviroment/dev/terraform.tfvars
 ```
-

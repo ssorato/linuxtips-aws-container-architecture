@@ -34,14 +34,13 @@ ecs_service = {
     port                = 8080
   }
   service_launch_type = "EC2"
-  service_task_count  = 1
   service_hosts       = ["linuxtips.mydomain.fake"]
 }
 
 common_scale = {
   scale_type   = "cpu"
-  task_maximum = 7
-  task_minimum = 3
+  task_maximum = 6
+  task_minimum = 1
   task_desired = 3
   in_cooldown  = 60
   out_cooldown = 60
@@ -52,8 +51,8 @@ cloudwatch_scale = {
   out_cpu_threshold       = 50
   out_adjustment          = 1
   out_comparison_operator = "GreaterThanOrEqualToThreshold"
-  out_period              = 10
-  out_evaluation_periods  = 1
+  out_period              = 30
+  out_evaluation_periods  = 2
   in_statistic            = "Average"
   in_cpu_threshold        = 30
   in_adjustment           = -1
