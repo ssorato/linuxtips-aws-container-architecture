@@ -46,7 +46,12 @@ Connection: keep-alive
 Load test using [k6](https://k6.io/):
 
 ```bash
+# scale_type = cpu
 $ k6 run -e MY_HOSTNAME=$ALB_DNS load_test/autoscaling-cpu-k6.js
+# scale_type = cpu_tracking
+$ k6 run -e MY_HOSTNAME=$ALB_DNS load_test/autoscaling-tracking-cpu-k6.js
+# scale_type = requests_tracking
+$ k6 run -e MY_HOSTNAME=$ALB_DNS load_test/autoscaling-tracking-requests-k6.js
 ```
 see also [Monitor Amazon ECS using CloudWatch](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cloudwatch-metrics.html).
 

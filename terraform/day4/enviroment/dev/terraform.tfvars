@@ -14,6 +14,7 @@ ssm_private_subnet_list = [
   "/linuxtips/vpc/subnet_private_us_east_1c_id"
 ]
 
+ssm_alb_arn          = "/linuxtips/ecs/lb/arn"
 ssm_alb_listener_arn = "/linuxtips/ecs/lb/listerner_arn"
 
 ecs_service = {
@@ -38,7 +39,7 @@ ecs_service = {
 }
 
 common_scale = {
-  scale_type   = "cpu"
+  scale_type   = "requests_tracking" # cpu/cpu_tracking/requests_tracking
   task_maximum = 6
   task_minimum = 1
   task_desired = 3
@@ -60,3 +61,6 @@ cloudwatch_scale = {
   in_period               = 30
   in_evaluation_periods   = 2
 }
+
+tracking_scale_cpu      = 50
+tracking_scale_requests = 20

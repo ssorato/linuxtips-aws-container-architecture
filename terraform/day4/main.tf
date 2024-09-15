@@ -15,6 +15,9 @@ module "ecs_app" {
   ecs_service             = var.ecs_service
   common_scale            = var.common_scale
   cloudwatch_scale        = var.cloudwatch_scale
+  tracking_scale_cpu      = var.tracking_scale_cpu
+  tracking_scale_requests = var.tracking_scale_requests
+  ssm_alb_arn             = var.ssm_alb_arn
 }
 
 # Pull chip image from Docker Hub and push to the ECR
