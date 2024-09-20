@@ -4,6 +4,7 @@ Requirements:
 
 * the [day 1](../day1/README.md) network infrastructure.
 * the [day 2](../day2/README.md) ECS infrastructure.
+* Docker running on the host where the Terraform runs, due to the provider `kreuzwerker/docker`
 
 
 Create the files:
