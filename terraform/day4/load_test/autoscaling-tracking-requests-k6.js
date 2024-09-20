@@ -2,8 +2,8 @@ import http from 'k6/http';
 
 export const options = {
   stages: [
-    { duration: '3m', target: 22 },
-    { duration: '10m', target: 22 },
+    { duration: '3m', target: 1 },
+    { duration: '15m', target: 1 },
     { duration: '3m', target: 0 },
   ],
   noConnectionReuse: true,
