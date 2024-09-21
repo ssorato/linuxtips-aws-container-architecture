@@ -33,27 +33,6 @@ variable "alb_ingress_cidr_enabled" {
   description = "A list of CIDR enabled to access the ALB"
 }
 
-variable "ecs" {
-  type = object({
-    nodes_ami           = string
-    node_instance_type  = string
-    node_volume_size_gb = number
-    node_volume_type    = optional(string, "gp3")
-    on_demand = object({
-      desired_size = number
-      min_size     = number
-      max_size     = number
-    })
-    spot = object({
-      desired_size = number
-      min_size     = number
-      max_size     = number
-      max_price    = string
-    })
-  })
-  description = "ECS sizing"
-}
-
 variable "ecs_service" {
   type = object({
     name      = string
