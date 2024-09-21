@@ -15,3 +15,4 @@ IaC using:
 | [Day 2](terraform/day2/README.md) | ECS with EC2 on-demand and spot       |
 | [Day 3](terraform/day3/README.md) | ECS demo application                  |
 | [Day 4](terraform/day4/README.md) | ECS demo application with autoscaling |
+| [Day 5](terraform/day5/README.md) | ECS demo application using Fargate    |
