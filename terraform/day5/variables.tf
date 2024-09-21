@@ -46,7 +46,10 @@ variable "ecs_service" {
     }))
     capabilities        = list(string)
     service_healthcheck = map(any)
-    service_launch_type = string
+    service_launch_type = list(object({
+      capacity_provider = string
+      weight            = number
+    }))
     service_hosts       = list(string)
   })
   description = "ECS service"
@@ -96,3 +99,10 @@ variable "ssm_alb_arn" {
   type        = string
   description = "The ALB arn from AWS Systems Manager Parameter Store"
 }
+
+variable "capacity_providers" {
+  type        = list(string)
+  description = "A list of capacity providers used by ECS with Fargate"
+  default     = ["FARGATE", "FARGATE_SPOT"]
+}
+

@@ -9,6 +9,7 @@ module "ecs_fargate" {
   aws_region               = var.aws_region
   project_name             = var.project_name
   alb_ingress_cidr_enabled = one(var.alb_ingress_cidr_enabled) == "auto" ? ["${chomp(data.http.my_public_ip.response_body)}/32"] : var.alb_ingress_cidr_enabled
+  capacity_providers       = var.capacity_providers
 }
 
 module "ecs_app" {

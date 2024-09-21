@@ -35,7 +35,7 @@ Testing the application:
 $ export ALB_DNS=<your alb dns name>
 $ curl -s -i $ALB_DNS/version -H "Host: linuxtips.mydomain.fake"
 HTTP/1.1 200 OK
-Date: Sat, 21 Sep 2024 10:48:15 GMT
+Date: Sat, 21 Sep 2024 12:28:18 GMT
 Content-Type: application/json; charset=utf-8
 Content-Length: 16
 Connection: keep-alive

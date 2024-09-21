@@ -15,6 +15,7 @@ ssm_private_subnet_list = [
 ]
 
 alb_ingress_cidr_enabled = ["auto"] # auto means uses the public ip of the host running terraform
+capacity_providers       = ["FARGATE", "FARGATE_SPOT"]
 
 ssm_alb_arn          = "/linuxtips/ecs/lb/arn"
 ssm_alb_listener_arn = "/linuxtips/ecs/lb/listerner_arn"
@@ -36,7 +37,16 @@ ecs_service = {
     path                = "/healthcheck"
     port                = 8080
   }
-  service_launch_type = "FARGATE"
+  service_launch_type = [
+    {
+      capacity_provider = "FARGATE"
+      weight = 50
+    },
+    {
+      capacity_provider = "FARGATE_SPOT"
+      weight = 50
+    }  
+  ]
   service_hosts       = ["linuxtips.mydomain.fake"]
 }
 
