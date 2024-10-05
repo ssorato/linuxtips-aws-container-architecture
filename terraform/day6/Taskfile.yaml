@@ -32,6 +32,7 @@ tasks:
 
   infra-ci:
     desc: Infrastructure CI
+    dir: terraform
     cmds:
       - echo "Terraform format and check"
       - terraform fmt --recursive --check
@@ -83,6 +84,7 @@ tasks:
 
   infra-cd:
     desc: Infrastructure CD
+    dir: terraform
     deps:
       - task: build-app
     interactive: true
@@ -108,11 +110,14 @@ tasks:
       - aws ecs wait services-stable --cluster {{.CLUSTER_NAME}} --services {{.APP_NAME}}
 
   destroy:
+    dir: terraform
     prompt: Do you want to continue?
     cmds:
       - terraform destroy -var-file=environment/dev/terraform.tfvars -auto-approve -var container_image={{.REPOSITORY_TAG}}
       - rm -rf .terraform.lock.hcl 
       - rm -rf .terraform
+      - echo "Delete ECR repository"
+      - aws ecr delete-repository --repository-name linuxtips/linuxtips-app --force
       - echo
       - echo "Don't forget to clean the day1 infrastructure"
       - echo
