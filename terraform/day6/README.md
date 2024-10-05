@@ -1,11 +1,10 @@
-# Linuxtips course: ECS demo application and autoscaling
+# Linuxtips course: ECS using Fargate and pipeline using GitHub Actions
+
+Creation of AWS infrastructure, construction of docker image and submission to ECR using GitHub Actions pipeline.
 
 Requirements:
 
 * the [day 1](../day1/README.md) network infrastructure.
-* the [day 2](../day2/README.md) ECS infrastructure.
-* Docker running on the host where the Terraform runs, due to the provider `kreuzwerker/docker`
-
 
 Create the files:
 * `environment/dev/backend.tfvars`:
@@ -29,39 +28,47 @@ $ terraform apply -var-file=environment/dev/terraform.tfvars
 
 ECR image:
 
-We are using `fidelissauro/chip:latest`. The image is pushed to the ECR using terraform.
+The GitHub Action build the image and push to the ECR.
 
 Testing the application:
 ```bash
 $ export ALB_DNS=<your alb dns name>
 $ curl -s -i $ALB_DNS/version -H "Host: linuxtips.mydomain.fake"
 HTTP/1.1 200 OK
-Date: Sat, 14 Sep 2024 21:13:11 GMT
-Content-Type: application/json; charset=utf-8
-Content-Length: 16
+Date: Sat, 05 Oct 2024 14:11:01 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 2
 Connection: keep-alive
 
-{"version":"v2"}
+v6
 ```
-
-Load test using [k6](https://k6.io/):
-
-```bash
-# scale_type = cpu
-$ k6 run -e MY_HOSTNAME=$ALB_DNS load_test/autoscaling-cpu-k6.js
-# scale_type = cpu_tracking
-$ k6 run -e MY_HOSTNAME=$ALB_DNS load_test/autoscaling-tracking-cpu-k6.js
-# scale_type = requests_tracking
-$ k6 run -e MY_HOSTNAME=$ALB_DNS load_test/autoscaling-tracking-requests-k6.js
-```
-see also [Monitor Amazon ECS using CloudWatch](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cloudwatch-metrics.html).
 
 Cleanup:
 
 ```bash
 $ terraform destroy -var-file=environment/dev/terraform.tfvars
-$ cd ../day2
-$ terraform destroy -var-file=environment/dev/terraform.tfvars
 $ cd ../day1
 $ terraform destroy -var-file=environment/dev/terraform.tfvars
+```
+
+# Tip
+
+[AWS Fargate Pricing Calculator](https://cloudtempo.dev/fargate-pricing-calculator)
+
+# Local pipeline
+
+Using [Task](https://taskfile.dev):
+
+```bash
+$ task --list-all
+task: Available tasks for this project:
+* app-ci:            Application CI
+* build-app:         Build application
+* default:           Default task: execute wait_deploy
+* destroy:           
+* infra-cd:          Infrastructure CD
+* infra-ci:          Infrastructure CI
+* wait_deploy:       Waiting for deployment to complete
+
+$ task
 ```

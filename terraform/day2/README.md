@@ -5,31 +5,31 @@ Requirements:
 * the [day 1](../day1/README.md) network infrastructure.
 
 Create the files:
-* `enviroment/dev/backend.tfvars`:
+* `environment/dev/backend.tfvars`:
   ```tf
   bucket         = "<tfstate bucket name>"
   key            = "<tfstate bucket key>"
   dynamodb_table = "<tfstate lock dynamodb table name>"
   region         = "<bucket and dynamodb region>"
   ```
-* `enviroment/dev/terraform.tfvars`:
+* `environment/dev/terraform.tfvars`:
   * your terraform variables values
 
 Terraform:
 
 ```bash
-$ terraform init -backend-config=enviroment/dev/backend.tfvars
+$ terraform init -backend-config=environment/dev/backend.tfvars
 $ terraform validate
-$ terraform plan -var-file=enviroment/dev/terraform.tfvars
-$ terraform apply -var-file=enviroment/dev/terraform.tfvars
+$ terraform plan -var-file=environment/dev/terraform.tfvars
+$ terraform apply -var-file=environment/dev/terraform.tfvars
 ```
 
 Cleanup:
 
 ```bash
-$ terraform destroy -var-file=enviroment/dev/terraform.tfvars
+$ terraform destroy -var-file=environment/dev/terraform.tfvars
 $ cd ../day1
-$ terraform destroy -var-file=enviroment/dev/terraform.tfvars
+$ terraform destroy -var-file=environment/dev/terraform.tfvars
 ```
 
 # Tip
@@ -37,7 +37,7 @@ $ terraform destroy -var-file=enviroment/dev/terraform.tfvars
 Show sensitive values in plan:
 
 ```bash
-$ terraform plan -var-file=enviroment/dev/terraform.tfvars -out=tfplan
+$ terraform plan -var-file=environment/dev/terraform.tfvars -out=tfplan
 $ terraform show -json tfplan | jq
 ```
 
