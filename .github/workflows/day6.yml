@@ -61,6 +61,7 @@ jobs:
           dynamodb_table = "${{ secrets.DYNAMODB_TABLE_NAME }}"
           region         = "${{ env.AWS_REGION }}"
           EOT
+        working-directory: ./terraform/day6/terraform
 
       - name: Terraform fmt check
         run: |
