@@ -20,10 +20,12 @@ Create the files:
 Terraform:
 
 ```bash
+$ cd terraform
 $ terraform init -backend-config=environment/dev/backend.tfvars
 $ terraform validate
 $ terraform plan -var-file=environment/dev/terraform.tfvars
 $ terraform apply -var-file=environment/dev/terraform.tfvars
+$ cd ..
 ```
 
 ECR image:
@@ -46,9 +48,11 @@ v6
 Cleanup:
 
 ```bash
+$ cd terraform
 $ terraform destroy -var-file=environment/dev/terraform.tfvars
 $ cd ../day1
 $ terraform destroy -var-file=environment/dev/terraform.tfvars
+$ cd ..
 ```
 
 # Tip
@@ -62,13 +66,13 @@ Using [Task](https://taskfile.dev):
 ```bash
 $ task --list-all
 task: Available tasks for this project:
-* app-ci:            Application CI
-* build-app:         Build application
-* default:           Default task: execute wait_deploy
-* destroy:           
-* infra-cd:          Infrastructure CD
-* infra-ci:          Infrastructure CI
-* wait_deploy:       Waiting for deployment to complete
+* app-ci:               Application CI
+* build-push-app:       Build application and push container image
+* default:              Default task: execute wait_deploy
+* destroy:              Destroy ecs
+* infra-cd:             Infrastructure CD
+* infra-ci:             Infrastructure CI
+* wait_deploy:          Waiting for deployment to complete
 
 $ task
 ```

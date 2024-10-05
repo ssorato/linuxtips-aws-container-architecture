@@ -15,7 +15,7 @@ crash.*.log
 # to change depending on the environment.
 *.tfvars
 *.tfvars.json
-!day*/environment/dev/terraform.tfvars
+!day6/terraform/environment/dev/terraform.tfvars
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in
@@ -41,5 +41,3 @@ terraform.rc
 # Infracost
 .infracost
 
-# Samples
-day4/load_test/sample-k6.js

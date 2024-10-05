@@ -4,7 +4,7 @@ vars:
   REPOSITORY_PATH: "linuxtips"
   APP_NAME: "linuxtips-app"
   CLUSTER_NAME: "ecs-linuxtips" # format("ecs-%s", var.project_name)
-  BRANCH_NAME: "dev" # tip - get branch name from cli: git rev-parse --abbrev-ref HEAD
+  TF_ENV_NAME: "dev" # tip - get branch name from cli: git rev-parse --abbrev-ref HEAD
   GIT_COMMIT_HASH:
     sh: git rev-parse --short HEAD # used in the image tag
   AWS_ACCOUNT:
@@ -41,8 +41,8 @@ tasks:
       - echo "Terraform validate"
       - terraform validate
   
-  build-app:
-    desc: Build application
+  build-push-app:
+    desc: Build application and push container image
     deps:
       - task: app-ci
       - task: infra-ci
@@ -79,6 +79,8 @@ tasks:
       - docker tag app:latest {{.AWS_ACCOUNT}}.dkr.ecr.us-east-1.amazonaws.com/{{.REPOSITORY_NAME}}:{{.GIT_COMMIT_HASH}}
       - echo "Push image to the ECR"
       - docker push {{.AWS_ACCOUNT}}.dkr.ecr.us-east-1.amazonaws.com/{{.REPOSITORY_NAME}}:{{.GIT_COMMIT_HASH}}
+      - echo "ECR logout"
+      - docker logout {{.AWS_ACCOUNT}}.dkr.ecr.us-east-1.amazonaws.com
     vars:
       REPOSITORY_NAME: "{{.REPOSITORY_PATH}}/{{.APP_NAME}}"
 
@@ -86,20 +88,18 @@ tasks:
     desc: Infrastructure CD
     dir: terraform
     deps:
-      - task: build-app
+      - task: build-push-app
     interactive: true
     cmds:
-      - echo "Terraform init"
-      - terraform init -backend-config=environment/dev/backend.tfvars -var container_image={{.REPOSITORY_TAG}}
-      - echo "Terraform plan"
-      - terraform plan -var-file=environment/dev/terraform.tfvars -var container_image={{.REPOSITORY_TAG}}
-      - echo -n "Ready? "; read a
-      - echo "Terraform apply"
-      - terraform apply --auto-approve -var-file=environment/{{.BRANCH_NAME}}/terraform.tfvars -var container_image={{.REPOSITORY_TAG}}
-    vars:
-      # container image with SHA tracking
-      REPOSITORY_TAG: 
-        sh: docker inspect --format='{{`{{index .RepoDigests 0}}`}}' {{.AWS_ACCOUNT}}.dkr.ecr.us-east-1.amazonaws.com/{{.REPOSITORY_PATH}}/{{.APP_NAME}}:{{.GIT_COMMIT_HASH}}
+      - |-
+        REPOSITORY_TAG=$(docker inspect --format='{{`{{index .RepoDigests 0}}`}}' {{.AWS_ACCOUNT}}.dkr.ecr.us-east-1.amazonaws.com/{{.REPOSITORY_PATH}}/{{.APP_NAME}}:{{.GIT_COMMIT_HASH}})
+        echo "Terraform init"
+        terraform init -backend-config=environment/{{.TF_ENV_NAME}}/backend.tfvars -var container_image=$REPOSITORY_TAG
+        echo "Terraform plan"
+        terraform plan -var-file=environment/{{.TF_ENV_NAME}}/terraform.tfvars -var container_image=$REPOSITORY_TAG
+        echo -n "Ready? "; read a
+        echo "Terraform apply"
+        terraform apply --auto-approve -var-file=environment/{{.TF_ENV_NAME}}/terraform.tfvars -var container_image=$REPOSITORY_TAG
 
   wait_deploy:
     desc: Waiting for deployment to complete
@@ -110,18 +110,19 @@ tasks:
       - aws ecs wait services-stable --cluster {{.CLUSTER_NAME}} --services {{.APP_NAME}}
 
   destroy:
+    desc: Destroy ecs
     dir: terraform
     prompt: Do you want to continue?
     cmds:
-      - terraform destroy -var-file=environment/dev/terraform.tfvars -auto-approve -var container_image={{.REPOSITORY_TAG}}
+      - |-
+        REPOSITORY_TAG=$(docker inspect --format='{{`{{index .RepoDigests 0}}`}}' {{.AWS_ACCOUNT}}.dkr.ecr.us-east-1.amazonaws.com/{{.REPOSITORY_PATH}}/{{.APP_NAME}}:{{.GIT_COMMIT_HASH}})
+        terraform destroy -var-file=environment/{{.TF_ENV_NAME}}/terraform.tfvars -auto-approve -var container_image=$REPOSITORY_TAG
       - rm -rf .terraform.lock.hcl 
       - rm -rf .terraform
       - echo "Delete ECR repository"
-      - aws ecr delete-repository --repository-name linuxtips/linuxtips-app --force
-      - echo
-      - echo "Don't forget to clean the day1 infrastructure"
-      - echo
-    vars:
-      # container image with SHA tracking
-      REPOSITORY_TAG: 
-        sh: docker inspect --format='{{`{{index .RepoDigests 0}}`}}' {{.AWS_ACCOUNT}}.dkr.ecr.us-east-1.amazonaws.com/{{.REPOSITORY_PATH}}/{{.APP_NAME}}:{{.GIT_COMMIT_HASH}}
+      - aws ecr delete-repository --repository-name {{.REPOSITORY_PATH}}/{{.APP_NAME}} --force
+      - cmd: echo
+        silent: true
+      - cmd: echo "Don't forget to clean the day1 infrastructure"
+        silent: true
+
