@@ -1,11 +1,13 @@
 name: CI/CD Pipeline - day6
 
-on:
-  push:
-    branches:
-      - master
-    path:
-      - terraform/day6/app/**
+on: workflow_dispatch
+
+# on:
+#   push:
+#     branches:
+#       - master
+#     paths:
+#       - terraform/day6/app/**
 
 env:
   REPOSITORY_PATH: "linuxtips"
