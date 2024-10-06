@@ -125,11 +125,13 @@ Change the application version in the [main.go](app/main.go) file and observe th
 ### Manually cleanup ECS application
 
 ```bash
+$ export ECR_REPO=<ecr repository>
 $ cd terraform/ecs_app
 $ terraform destroy -var-file=environment/dev/terraform.tfvars
 $ rm -r .terraform.lock.hcl 
 $ rm -rf .terraform
 $ cd ../..
+$ aws ecr delete-repository --repository-name $ECR_REPO --force
 ```
 
 ### Alternative: manually cleanup ECS application using local pipeline

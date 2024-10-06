@@ -1,0 +1,84 @@
+name: CI/CD Pipeline - day6 destroy
+
+# workflow triggered manually
+on: workflow_dispatch
+
+env:
+  REPOSITORY_PATH: "linuxtips"
+  APP_NAME: "linuxtips-app"
+  CLUSTER_NAME: "ecs-linuxtips"
+  TF_ENV_NAME: "dev"
+  AWS_REGION: "us-east-1"
+
+
+jobs:
+
+  infra-cd-destroy:
+    runs-on: ubuntu-latest
+    name: Infrastructure CD destroy
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4      
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.5"
+
+      - name: Build backend.tfvars
+        run: |
+          cat <<EOT > environment/${{ env.TF_ENV_NAME }}/backend.tfvars
+          bucket         = "${{ secrets.S3_BUCKET_NAME}}"
+          key            = "${{ secrets.S3_KEY_ROOT_PATH}}/day6-ecsapp-github.tfstate"
+          dynamodb_table = "${{ secrets.DYNAMODB_TABLE_NAME }}"
+          region         = "${{ env.AWS_REGION }}"
+          EOT
+          ls -l environment/${{ env.TF_ENV_NAME }}/backend.tfvars
+          pwd
+          cat environment/${{ env.TF_ENV_NAME }}/backend.tfvars
+        working-directory: ./terraform/day6/terraform/ecs_app
+
+      - name: Terraform init
+        run: |
+          terraform init -backend-config=environment/${{ env.TF_ENV_NAME }}/backend.tfvars
+        working-directory: ./terraform/day6/terraform/ecs_app
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION:  ${{ env.AWS_REGION }}
+
+      - name: Terraform destroy
+        run: |
+          export TF_VAR_container_image=${{ secrets.AWS_ACCOUNT }}.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:${GITHUB_SHA::8}
+          terraform destroy  \
+            --auto-approve \
+            -var-file=environment/${{ env.TF_ENV_NAME }}/terraform.tfvars
+        working-directory: ./terraform/day6/terraform/ecs_app
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION:  ${{ env.AWS_REGION }}
+          REPOSITORY_NAME: "${{ env.REPOSITORY_PATH }}/${{ env.APP_NAME }}"
+
+  ecr-delete:
+    runs-on: ubuntu-latest
+    name: Delete ECR
+    needs:
+      - infra-cd-destroy
+    steps:
+      - name: Login to Amazon ECR Private
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION:  ${{ env.AWS_REGION }}
+
+      - name: Delete ECR repository
+        run: |
+          aws ecr delete-repository --repository-name $REPOSITORY_NAME --force
+        env:
+          REPOSITORY_NAME: "${{ env.REPOSITORY_PATH }}/${{ env.APP_NAME }}"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION:  ${{ env.AWS_REGION }}

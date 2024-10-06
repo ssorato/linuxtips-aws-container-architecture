@@ -1,15 +1,15 @@
 name: CI/CD Pipeline - day6
 
 # workflow triggered manually
-on: workflow_dispatch
+# on: workflow_dispatch
 
 # workflow triggered on branch master and on terraform/day6/app/ changes
-# on:
-#   push:
-#     branches:
-#       - master
-#     paths:
-#       - terraform/day6/app/**
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - terraform/day6/app/**
 
 env:
   REPOSITORY_PATH: "linuxtips"
@@ -54,30 +54,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # https://github.com/hashicorp/terraform/issues/34528#issuecomment-1997149329
+      # │ Error saving state: failed to upload state: operation error S3: PutObject,
+      # │ failed to rewind transport stream for retry, request stream is not seekable
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "1.7.0"
+          terraform_version: "1.7.5"
 
       - name: Build backend.tfvars
         run: |
           cat <<EOT > environment/${{ env.TF_ENV_NAME }}/backend.tfvars
           bucket         = "${{ secrets.S3_BUCKET_NAME}}"
-          key            = "${{ secrets.S3_KEY_ROOT_PATH}}/day6.tfstate"
+          key            = "${{ secrets.S3_KEY_ROOT_PATH}}/day6-ecsapp-github.tfstate"
           dynamodb_table = "${{ secrets.DYNAMODB_TABLE_NAME }}"
           region         = "${{ env.AWS_REGION }}"
           EOT
-        working-directory: ./terraform/day6/terraform
+        working-directory: ./terraform/day6/terraform/ecs_app
 
       - name: Terraform fmt check
         run: |
           terraform fmt --recursive --check
-        working-directory: ./terraform/day6/terraform
+        working-directory: ./terraform/day6/terraform/ecs_app
 
       - name: Terraform init
         run: |
           terraform init -backend-config=environment/${{ env.TF_ENV_NAME }}/backend.tfvars
-        working-directory: ./terraform/day6/terraform
+        working-directory: ./terraform/day6/terraform/ecs_app
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -173,22 +176,25 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "1.7.0"
+          terraform_version: "1.7.5"
 
       - name: Build backend.tfvars
         run: |
           cat <<EOT > environment/${{ env.TF_ENV_NAME }}/backend.tfvars
           bucket         = "${{ secrets.S3_BUCKET_NAME}}"
-          key            = "${{ secrets.S3_KEY_ROOT_PATH}}/day6.tfstate"
+          key            = "${{ secrets.S3_KEY_ROOT_PATH}}/day6-ecsapp-github.tfstate"
           dynamodb_table = "${{ secrets.DYNAMODB_TABLE_NAME }}"
           region         = "${{ env.AWS_REGION }}"
           EOT
-        working-directory: ./terraform/day6/terraform
+          ls -l environment/${{ env.TF_ENV_NAME }}/backend.tfvars
+          pwd
+          cat environment/${{ env.TF_ENV_NAME }}/backend.tfvars
+        working-directory: ./terraform/day6/terraform/ecs_app
 
       - name: Terraform init
         run: |
           terraform init -backend-config=environment/${{ env.TF_ENV_NAME }}/backend.tfvars
-        working-directory: ./terraform/day6/terraform
+        working-directory: ./terraform/day6/terraform/ecs_app
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -196,10 +202,11 @@ jobs:
 
       - name: Terraform plan
         run: |
-          terraform plan -var alb_ingress_cidr_enabled=["${{ secrets.ALB_INGRESS_CIDR_ENABLED }}"] \
-            -var-file=environment/${{ env.TF_ENV_NAME }}/terraform.tfvars \
-            -var container_image=${{ secrets.AWS_ACCOUNT }}.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:${GITHUB_SHA::8}
-        working-directory: ./terraform/day6/terraform
+          export TF_VAR_container_image=${{ secrets.AWS_ACCOUNT }}.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:${GITHUB_SHA::8}
+          export TF_VAR_alb_ingress_cidr_enabled="[\"${{ secrets.ALB_INGRESS_CIDR_ENABLED }}\"]" 
+          terraform plan \
+            -var-file=environment/${{ env.TF_ENV_NAME }}/terraform.tfvars
+        working-directory: ./terraform/day6/terraform/ecs_app
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -208,12 +215,28 @@ jobs:
 
       - name: Terraform Apply
         run: |
+          export TF_VAR_container_image=${{ secrets.AWS_ACCOUNT }}.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:${GITHUB_SHA::8}
+          export TF_VAR_alb_ingress_cidr_enabled="[\"${{ secrets.ALB_INGRESS_CIDR_ENABLED }}\"]" 
           terraform apply \
-            --auto-approve -var alb_ingress_cidr_enabled=["${{ secrets.ALB_INGRESS_CIDR_ENABLED }}"] \
-            -var-file=environment/${{ env.TF_ENV_NAME }}/terraform.tfvars \
-            -var container_image=${{ secrets.AWS_ACCOUNT }}.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:${GITHUB_SHA::8}
-        working-directory: ./terraform/day6/terraform
+            --auto-approve \
+            -var-file=environment/${{ env.TF_ENV_NAME }}/terraform.tfvars
+        working-directory: ./terraform/day6/terraform/ecs_app
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION:  ${{ env.AWS_REGION }}
+          REPOSITORY_NAME: "${{ env.REPOSITORY_PATH }}/${{ env.APP_NAME }}"
+
+  wait_deploy:
+    runs-on: ubuntu-latest
+    name: Waiting for deployment to complete
+    needs:
+      - infra-cd
+    steps:
+      - name: Waiting for deployment to complete
+        run: |
+          aws ecs wait services-stable --cluster ${{ env.CLUSTER_NAME }} --services  ${{ env.APP_NAME }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION:  ${{ env.AWS_REGION }}      
