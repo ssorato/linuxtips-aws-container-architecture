@@ -92,3 +92,71 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION:  ${{ env.AWS_REGION }}
 
+  build-push-app:
+    runs-on: ubuntu-latest
+    name: Build application and push container image to the ECR
+    needs:
+      - app-ci
+      - infra-ci
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Amazon ECR Private
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION:  ${{ env.AWS_REGION }}
+
+      - name: Create ECR repository if not exists
+        run: |
+          set +e
+
+          # Check if repository already exists
+          REPO_EXISTS=$(aws ecr describe-repositories --repository-names $REPOSITORY_NAME 2>&1)
+
+          if [[ $REPO_EXISTS == *"RepositoryNotFoundException"* ]]; then
+            echo "Repository $REPOSITORY_NAME not found. Creating ..."
+            
+            # Create the repository
+            aws ecr create-repository --repository-name $REPOSITORY_NAME
+            
+            if [ $? -eq 0 ]; then
+              echo "Repository $REPOSITORY_NAME created successfully."
+            else
+              echo "Error on creating the repository $REPOSITORY_NAME."
+              exit 1
+            fi
+          else
+            echo "Repository $REPOSITORY_NAME already exists."
+          fi
+
+          set -e
+        env:
+          REPOSITORY_NAME: "${{ env.REPOSITORY_PATH }}/${{ env.APP_NAME }}"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+
+      - name: Build container image
+        run: |
+          docker buildx build --platform linux/amd64 -t app . 
+        working-directory: ./terraform/day6/app
+
+      # The default environment variables that GitHub sets
+      # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables
+      - name: Tag container image
+        run: |
+          docker tag app:latest ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:${GITHUB_SHA::8}
+        working-directory: ./terraform/day6/app
+        env:
+          REPOSITORY_NAME: "${{ env.REPOSITORY_PATH }}/${{ env.APP_NAME }}"
+
+      - name: Push container image to the ECR
+        run: |
+          docker push ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:${GITHUB_SHA::8}
+        working-directory: ./terraform/day6/app
+        env:
+          REPOSITORY_NAME: "${{ env.REPOSITORY_PATH }}/${{ env.APP_NAME }}"
