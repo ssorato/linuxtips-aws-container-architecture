@@ -50,7 +50,7 @@ variable "ecs_service" {
       capacity_provider = string
       weight            = number
     }))
-    service_hosts       = list(string)
+    service_hosts = list(string)
   })
   description = "ECS service"
 }
