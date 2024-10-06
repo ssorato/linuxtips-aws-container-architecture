@@ -28,11 +28,6 @@ variable "ssm_alb_listener_arn" {
   description = "The ALB listernet arn from AWS Systems Manager Parameter Store"
 }
 
-variable "alb_ingress_cidr_enabled" {
-  type        = list(string)
-  description = "A list of CIDR enabled to access the ALB"
-}
-
 variable "ecs_service" {
   type = object({
     name      = string

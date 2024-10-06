@@ -32,7 +32,7 @@ tasks:
 
   infra-ci:
     desc: Infrastructure CI
-    dir: terraform
+    dir: terraform/ecs_app
     cmds:
       - echo "Terraform format and check"
       - terraform fmt --recursive --check
@@ -86,7 +86,7 @@ tasks:
 
   infra-cd:
     desc: Infrastructure CD
-    dir: terraform
+    dir: terraform/ecs_app
     deps:
       - task: build-push-app
     interactive: true
@@ -111,7 +111,7 @@ tasks:
 
   destroy:
     desc: Destroy ecs
-    dir: terraform
+    dir: terraform/ecs_app
     prompt: Do you want to continue?
     cmds:
       - |-
@@ -123,6 +123,6 @@ tasks:
       - aws ecr delete-repository --repository-name {{.REPOSITORY_PATH}}/{{.APP_NAME}} --force
       - cmd: echo
         silent: true
-      - cmd: echo "Don't forget to clean the day1 infrastructure"
+      - cmd: echo "Don't forget to clean the ecs and the day1 infrastructure"
         silent: true
 

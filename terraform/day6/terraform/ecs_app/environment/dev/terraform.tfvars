@@ -14,8 +14,7 @@ ssm_private_subnet_list = [
   "/linuxtips/vpc/subnet_private_us_east_1c_id"
 ]
 
-alb_ingress_cidr_enabled = ["auto"] # auto means uses the public ip of the host running terraform
-capacity_providers       = ["FARGATE", "FARGATE_SPOT"]
+capacity_providers = ["FARGATE", "FARGATE_SPOT"]
 
 ssm_alb_arn          = "/linuxtips/ecs/lb/arn"
 ssm_alb_listener_arn = "/linuxtips/ecs/lb/listerner_arn"
