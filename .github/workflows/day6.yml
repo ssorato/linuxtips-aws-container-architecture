@@ -1,7 +1,9 @@
 name: CI/CD Pipeline - day6
 
+# workflow triggered manually
 on: workflow_dispatch
 
+# workflow triggered on branch master and on terraform/day6/app/ changes
 # on:
 #   push:
 #     branches:
@@ -29,10 +31,12 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
+        working-directory: ./terraform/day6/app
 
       - name: Install GoLint
         run: |
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.1
+        working-directory: ./terraform/day6/app
 
       - name: Lint App
         run: |
