@@ -160,3 +160,61 @@ jobs:
         working-directory: ./terraform/day6/app
         env:
           REPOSITORY_NAME: "${{ env.REPOSITORY_PATH }}/${{ env.APP_NAME }}"
+
+  infra-cd:
+    runs-on: ubuntu-latest
+    name: Infrastructure CD
+    needs:
+      - build-push-app
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4      
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      - name: Build backend.tfvars
+        run: |
+          cat <<EOT > environment/${{ env.TF_ENV_NAME }}/backend.tfvars
+          bucket         = "${{ secrets.S3_BUCKET_NAME}}"
+          key            = "${{ secrets.S3_KEY_ROOT_PATH}}/day6.tfstate"
+          dynamodb_table = "${{ secrets.DYNAMODB_TABLE_NAME }}"
+          region         = "${{ env.AWS_REGION }}"
+          EOT
+        working-directory: ./terraform/day6/terraform
+
+      - name: Terraform init
+        run: |
+          terraform init -backend-config=environment/${{ env.TF_ENV_NAME }}/backend.tfvars
+        working-directory: ./terraform/day6/terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION:  ${{ env.AWS_REGION }}
+
+      - name: Terraform plan
+        run: |
+          terraform plan \
+            -backend-config=environment/${{ env.TF_ENV_NAME }}/backend.tfvars \
+            -var container_image=${{ secrets.AWS_ACCOUNT }}.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:${GITHUB_SHA::8} \
+            -var alb_ingress_cidr_enabled=${{ secrets.ALB_INGRESS_CIDR_ENABLED }}
+        working-directory: ./terraform/day6/terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION:  ${{ env.AWS_REGION }}
+          REPOSITORY_NAME: "${{ env.REPOSITORY_PATH }}/${{ env.APP_NAME }}"
+
+      - name: Terraform Apply
+        run: terraform apply \
+          --auto-approve \
+          -var-file=environment/${{ env.TF_ENV_NAME }}/terraform.tfvars \
+          -var container_image=${{ secrets.AWS_ACCOUNT }}.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:${GITHUB_SHA::8} \
+          -var alb_ingress_cidr_enabled=${{ secrets.ALB_INGRESS_CIDR_ENABLED }}
+        working-directory: ./terraform/day6/terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION:  ${{ env.AWS_REGION }}
