@@ -1,16 +1,16 @@
 name: ECS app create
 
 # workflow triggered manually
-on: workflow_dispatch
+# on: workflow_dispatch
 
 # workflow triggered on branch master and on day changes
-# on:
-#   push:
-#     branches:
-#       - master
-#     paths:
-#       - day6/app/**
-#       - day7/app/**
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - day6/app/**
+      - day7/app/**
 
 env:
   REPOSITORY_PATH: "linuxtips"
