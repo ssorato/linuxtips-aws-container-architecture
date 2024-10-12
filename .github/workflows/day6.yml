@@ -1,15 +1,15 @@
 name: CI/CD Pipeline - day6
 
 # workflow triggered manually
-# on: workflow_dispatch
+on: workflow_dispatch
 
 # workflow triggered on branch master and on terraform/day6/app/ changes
-on:
-  push:
-    branches:
-      - master
-    paths:
-      - terraform/day6/app/**
+# on:
+#   push:
+#     branches:
+#       - master
+#     paths:
+#       - terraform/day6/app/**
 
 env:
   REPOSITORY_PATH: "linuxtips"
