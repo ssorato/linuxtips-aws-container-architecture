@@ -24,4 +24,6 @@ Cleanup:
 
 ```bash
 $ terraform destroy -var-file=environment/dev/terraform.tfvars
+$ rm -r .terraform.lock.hcl 
+$ rm -rf .terraform
 ```

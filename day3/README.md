@@ -52,9 +52,15 @@ Cleanup:
 
 ```bash
 $ terraform destroy -var-file=environment/dev/terraform.tfvars
+$ rm -r .terraform.lock.hcl 
+$ rm -rf .terraform
 $ cd ../day2
 $ terraform destroy -var-file=environment/dev/terraform.tfvars
+$ rm -r .terraform.lock.hcl 
+$ rm -rf .terraform
 $ cd ../day1
 $ terraform destroy -var-file=environment/dev/terraform.tfvars
+$ rm -r .terraform.lock.hcl 
+$ rm -rf .terraform
 ```
 

@@ -4,7 +4,7 @@ Creation of AWS infrastructure, construction of docker image and submission to E
 
 Requirements:
 
-* the [day 1](../day1/README.md) network infrastructure.
+* the [day 1](../../day1/README.md) network infrastructure.
 
 ## ECS cluster
 
@@ -16,7 +16,7 @@ Create the files:
   dynamodb_table = "<tfstate lock dynamodb table name>"
   region         = "<bucket and dynamodb region>"
   ```
-* `terraform/ecs/environment/dev/backend.tfvars`:
+* `terraform/ecs/environment/dev/terraform.tfvars`:
   * your terraform variables values
 
 Terraform:
@@ -34,6 +34,22 @@ $ cd ../..
 
 ### Manually deploy
 
+Build the application and push image to the ECR:
+
+```bash
+$ export AWS_ACCOUNT=<your AWS account id>
+$ cd app
+$ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.1
+$ golangci-lint -v run ./... -E errcheck
+$ aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $AWS_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com
+$ aws ecr create-repository --repository-name "linuxtips/linuxtips-app"
+$ docker buildx build --platform linux/amd64 -t app . 
+$ docker tag app:latest $AWS_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/linuxtips/linuxtips-app:v7
+$ docker push $AWS_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/linuxtips/linuxtips-app:v7
+$ docker logout $AWS_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com
+$ cd ..
+```
+
 Create the files:
 * `terraform/ecs/environment/dev/backend.tfvars`:
   ```tf
@@ -42,7 +58,7 @@ Create the files:
   dynamodb_table = "<tfstate lock dynamodb table name>"
   region         = "<bucket and dynamodb region>"
   ```
-* `terraform/ecs/environment/dev/backend.tfvars`:
+* `terraform/ecs/environment/dev/terraform.tfvars`:
   * your terraform variables values
 
 Terraform:
@@ -78,7 +94,7 @@ $ task
 
 ### Alternative: ECS application using GitHub Action pipeline
 
-See the [workflow](../../.github/workflows/day6.yml)
+See the [workflow](../../.github/workflows/ecs-app.yaml)
 
 The above workflow is trigged on push changes in the [app](app) folder.
 
@@ -125,7 +141,7 @@ Change the application version in the [main.go](app/main.go) file and observe th
 ### Manually cleanup ECS application
 
 ```bash
-$ export ECR_REPO=<ecr repository>
+$ export ECR_REPO="linuxtips/linuxtips-app"
 $ cd terraform/ecs_app
 $ terraform destroy -var-file=environment/dev/terraform.tfvars
 $ rm -r .terraform.lock.hcl 
@@ -156,7 +172,7 @@ $ task destroy
 
 ### Alternative: cleanup ECS application using GitHub Action pipeline
 
-See the [workflow](../../.github/workflows/day6-destroy.yml)
+See the [workflow](../../.github/workflows/ecs-app-destroy.yaml)
 
 The above workflow is trigged manually.
 
@@ -167,7 +183,7 @@ $ cd terraform/ecs
 $ terraform destroy -var-file=environment/dev/terraform.tfvars
 $ rm -r .terraform.lock.hcl 
 $ rm -rf .terraform
-$ cd ../../../day1
+$ cd ../../day1
 $ terraform destroy -var-file=environment/dev/terraform.tfvars
 $ rm -r .terraform.lock.hcl 
 $ rm -rf .terraform
@@ -177,4 +193,3 @@ $ cd ../day6
 # Tip
 
 [AWS Fargate Pricing Calculator](https://cloudtempo.dev/fargate-pricing-calculator)
-
