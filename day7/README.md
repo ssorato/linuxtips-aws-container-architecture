@@ -200,4 +200,4 @@ $ cd ../day7
 ```
 # References
 
-[Configuring Amazon EFS file systems for Amazon ECS using the console]https://docs.aws.amazon.com/AmazonECS/latest/developerguide/tutorial-efs-volumes.html)
+[Configuring Amazon EFS file systems for Amazon ECS using the console](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/tutorial-efs-volumes.html)
