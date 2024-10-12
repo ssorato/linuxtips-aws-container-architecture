@@ -1,15 +1,16 @@
-name: CI/CD Pipeline - day6
+name: ECS app create
 
 # workflow triggered manually
-on: workflow_dispatch
+# on: workflow_dispatch
 
-# workflow triggered on branch master and on terraform/day6/app/ changes
-# on:
-#   push:
-#     branches:
-#       - master
-#     paths:
-#       - terraform/day6/app/**
+# workflow triggered on branch master and on day changes
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - day6/app/**
+      - day7/app/**
 
 env:
   REPOSITORY_PATH: "linuxtips"
@@ -20,9 +21,45 @@ env:
 
 
 jobs:
+  changed-day:
+    runs-on: ubuntu-latest
+    name: Detect the changed day
+    outputs:
+      day: ${{ steps.day-changed.outputs.day }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # https://github.com/hashicorp/terraform/issues/34528#issuecomment-1997149329
+      # │ Error saving state: failed to upload state: operation error S3: PutObject,
+      # │ failed to rewind transport stream for retry, request stream is not seekable
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.5"
+
+      - name: Get the changed day
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          initial-fetch-depth: '1'
+          filters: |
+            day6: day6/app/**
+            day7: day7/app/**
+
+      # To think...
+      # steps.filter.outputs.changes is an array and can contains more than one changed day
+      - name: Set the changed day
+        id: day-changed
+        run: |
+          echo "::notice title=Changed day::The changed day is $( echo ${{ toJSON(steps.filter.outputs.changes) }} | jq -r '.[0]' )"
+          echo "day=$( echo ${{ toJSON(steps.filter.outputs.changes) }} | jq -r '.[0]' )" >> "$GITHUB_OUTPUT"
+
   app-ci:
     name: Application CI
     runs-on: ubuntu-latest
+    needs:
+      - changed-day
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,7 +69,7 @@ jobs:
         with:
           go-version: '1.22'
           cache-dependency-path: |
-            terraform/day6/app/go.sum
+            ${{ needs.changed-day.outputs.day }}/app/go.sum
 
       - name: Install GoLint
         run: |
@@ -41,15 +78,17 @@ jobs:
       - name: Lint App
         run: |
           golangci-lint run ./... -E errcheck
-        working-directory: ./terraform/day6/app
+        working-directory: ./${{ needs.changed-day.outputs.day }}/app
 
       - name: Test App
         run: go test ./...
-        working-directory: ./terraform/day6/app
+        working-directory: ./${{ needs.changed-day.outputs.day }}/app
 
   infra-ci:
     runs-on: ubuntu-latest
     name: Infrastructure CI
+    needs:
+      - changed-day
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -66,21 +105,21 @@ jobs:
         run: |
           cat <<EOT > environment/${{ env.TF_ENV_NAME }}/backend.tfvars
           bucket         = "${{ secrets.S3_BUCKET_NAME}}"
-          key            = "${{ secrets.S3_KEY_ROOT_PATH}}/day6-ecsapp-github.tfstate"
+          key            = "${{ secrets.S3_KEY_ROOT_PATH }}/${{ needs.changed-day.outputs.day }}-ecsapp-github.tfstate"
           dynamodb_table = "${{ secrets.DYNAMODB_TABLE_NAME }}"
           region         = "${{ env.AWS_REGION }}"
           EOT
-        working-directory: ./terraform/day6/terraform/ecs_app
+        working-directory: ./${{ needs.changed-day.outputs.day }}/terraform/ecs_app
 
       - name: Terraform fmt check
         run: |
           terraform fmt --recursive --check
-        working-directory: ./terraform/day6/terraform/ecs_app
+        working-directory: ./${{ needs.changed-day.outputs.day }}/terraform/ecs_app
 
       - name: Terraform init
         run: |
           terraform init -backend-config=environment/${{ env.TF_ENV_NAME }}/backend.tfvars
-        working-directory: ./terraform/day6/terraform/ecs_app
+        working-directory: ./${{ needs.changed-day.outputs.day }}/terraform/ecs_app
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -89,7 +128,7 @@ jobs:
       - name: Terraform Validate
         run: |
           terraform validate
-        working-directory: ./terraform
+        working-directory: ./${{ needs.changed-day.outputs.day }}/terraform/ecs_app
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -99,6 +138,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build application and push
     needs:
+      - changed-day
       - app-ci
       - infra-ci
     steps:
@@ -146,21 +186,21 @@ jobs:
       - name: Build container image
         run: |
           docker buildx build --platform linux/amd64 -t app . 
-        working-directory: ./terraform/day6/app
+        working-directory: ./${{ needs.changed-day.outputs.day }}/app
 
       # The default environment variables that GitHub sets
       # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables
       - name: Tag container image
         run: |
           docker tag app:latest ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:${GITHUB_SHA::8}
-        working-directory: ./terraform/day6/app
+        working-directory: ./${{ needs.changed-day.outputs.day }}/app
         env:
           REPOSITORY_NAME: "${{ env.REPOSITORY_PATH }}/${{ env.APP_NAME }}"
 
       - name: Push container image to the ECR
         run: |
           docker push ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:${GITHUB_SHA::8}
-        working-directory: ./terraform/day6/app
+        working-directory: ./${{ needs.changed-day.outputs.day }}/app
         env:
           REPOSITORY_NAME: "${{ env.REPOSITORY_PATH }}/${{ env.APP_NAME }}"
 
@@ -168,6 +208,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Infrastructure CD
     needs:
+      - changed-day
       - build-push-app
     steps:
       - name: Checkout repository
@@ -182,19 +223,16 @@ jobs:
         run: |
           cat <<EOT > environment/${{ env.TF_ENV_NAME }}/backend.tfvars
           bucket         = "${{ secrets.S3_BUCKET_NAME}}"
-          key            = "${{ secrets.S3_KEY_ROOT_PATH}}/day6-ecsapp-github.tfstate"
+          key            = "${{ secrets.S3_KEY_ROOT_PATH }}/${{ needs.changed-day.outputs.day }}-ecsapp-github.tfstate"
           dynamodb_table = "${{ secrets.DYNAMODB_TABLE_NAME }}"
           region         = "${{ env.AWS_REGION }}"
           EOT
-          ls -l environment/${{ env.TF_ENV_NAME }}/backend.tfvars
-          pwd
-          cat environment/${{ env.TF_ENV_NAME }}/backend.tfvars
-        working-directory: ./terraform/day6/terraform/ecs_app
+        working-directory: ./${{ needs.changed-day.outputs.day }}/terraform/ecs_app
 
       - name: Terraform init
         run: |
           terraform init -backend-config=environment/${{ env.TF_ENV_NAME }}/backend.tfvars
-        working-directory: ./terraform/day6/terraform/ecs_app
+        working-directory: ./${{ needs.changed-day.outputs.day }}/terraform/ecs_app
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -206,7 +244,7 @@ jobs:
           export TF_VAR_alb_ingress_cidr_enabled="[\"${{ secrets.ALB_INGRESS_CIDR_ENABLED }}\"]" 
           terraform plan \
             -var-file=environment/${{ env.TF_ENV_NAME }}/terraform.tfvars
-        working-directory: ./terraform/day6/terraform/ecs_app
+        working-directory: ./${{ needs.changed-day.outputs.day }}/terraform/ecs_app
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -220,7 +258,7 @@ jobs:
           terraform apply \
             --auto-approve \
             -var-file=environment/${{ env.TF_ENV_NAME }}/terraform.tfvars
-        working-directory: ./terraform/day6/terraform/ecs_app
+        working-directory: ./${{ needs.changed-day.outputs.day }}/terraform/ecs_app
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

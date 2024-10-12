@@ -1,7 +1,17 @@
-name: CI/CD Pipeline - day6 destroy
+name: ECS app destroy
 
 # workflow triggered manually
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+    inputs:
+      day:
+        type: choice
+        description: Which day?
+        required: true
+        default: day7
+        options:
+          - day6
+          - day7
 
 env:
   REPOSITORY_PATH: "linuxtips"
@@ -27,21 +37,22 @@ jobs:
 
       - name: Build backend.tfvars
         run: |
+          echo "::notice title=Changed day::The changed day is ${{ inputs.day }}"
           cat <<EOT > environment/${{ env.TF_ENV_NAME }}/backend.tfvars
           bucket         = "${{ secrets.S3_BUCKET_NAME}}"
-          key            = "${{ secrets.S3_KEY_ROOT_PATH}}/day6-ecsapp-github.tfstate"
+          key            = "${{ secrets.S3_KEY_ROOT_PATH}}/${{ inputs.day }}-ecsapp-github.tfstate"
           dynamodb_table = "${{ secrets.DYNAMODB_TABLE_NAME }}"
           region         = "${{ env.AWS_REGION }}"
           EOT
           ls -l environment/${{ env.TF_ENV_NAME }}/backend.tfvars
           pwd
           cat environment/${{ env.TF_ENV_NAME }}/backend.tfvars
-        working-directory: ./terraform/day6/terraform/ecs_app
+        working-directory: ./${{ inputs.day }}/terraform/ecs_app
 
       - name: Terraform init
         run: |
           terraform init -backend-config=environment/${{ env.TF_ENV_NAME }}/backend.tfvars
-        working-directory: ./terraform/day6/terraform/ecs_app
+        working-directory: ./${{ inputs.day }}/terraform/ecs_app
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -50,10 +61,11 @@ jobs:
       - name: Terraform destroy
         run: |
           export TF_VAR_container_image=${{ secrets.AWS_ACCOUNT }}.dkr.ecr.us-east-1.amazonaws.com/$REPOSITORY_NAME:${GITHUB_SHA::8}
+          export TF_VAR_alb_ingress_cidr_enabled="[\"${{ secrets.ALB_INGRESS_CIDR_ENABLED }}\"]" 
           terraform destroy  \
             --auto-approve \
             -var-file=environment/${{ env.TF_ENV_NAME }}/terraform.tfvars
-        working-directory: ./terraform/day6/terraform/ecs_app
+        working-directory: ./${{ inputs.day }}/terraform/ecs_app
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
