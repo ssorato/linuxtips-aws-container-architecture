@@ -91,16 +91,16 @@ Add the following secrets in the GitHub repository:
 $ export ALB_DNS=<your alb dns name>
 $ curl -s -i $ALB_DNS/version -H "Host: linuxtips.mydomain.fake"
 HTTP/1.1 200 OK
-Date: Sat, 12 Oct 2024 13:16:23 GMT
+Date: Sat, 12 Oct 2024 15:00:19 GMT
 Content-Type: text/plain; charset=utf-8
 Content-Length: 2
 Connection: keep-alive
 
-v7
+v9
 
 $ curl -s -i $ALB_DNS/healthcheck -H "Host: linuxtips.mydomain.fake"
 HTTP/1.1 200 OK
-Date: Sat, 12 Oct 2024 13:16:50 GMT
+Date: Sat, 12 Oct 2024 15:00:33 GMT
 Content-Type: text/plain; charset=utf-8
 Content-Length: 2
 Connection: keep-alive
@@ -115,7 +115,7 @@ Get files list:
 ```bash
 $ curl -s -i $ALB_DNS/files -H "Host: linuxtips.mydomain.fake"
 HTTP/1.1 200 OK
-Date: Sat, 12 Oct 2024 13:17:59 GMT
+Date: Sat, 12 Oct 2024 15:00:58 GMT
 Content-Type: application/json
 Content-Length: 14
 Connection: keep-alive
@@ -127,7 +127,13 @@ Create a file:
 
 ```bash
 $ curl -s -X POST $ALB_DNS/files -H "Host: linuxtips.mydomain.fake" -d 'Linux Tips is top!!!'
-{"file":"/mnt/efs/fec549f2-1aa8-4b85-acd2-9964440f15f7.txt","message":"File sucessful saved"}
+{"file":"/mnt/efs/6fa876f3-6c93-49b7-9c92-8aac96b5871e.txt","message":"File sucessful saved"}
+
+$ curl -s -X POST $ALB_DNS/files -H "Host: linuxtips.mydomain.fake" -d 'Yet another file'    
+{"file":"/mnt/efs/9d401f1c-5f19-4896-91ab-e3952827bdf1.txt","message":"File sucessful saved"}
+
+$ curl -s -X POST $ALB_DNS/files -H "Host: linuxtips.mydomain.fake" -d 'RTFM'
+{"file":"/mnt/efs/de4255c2-ddb0-46e0-ac09-dadc56581365.txt","message":"File sucessful saved"}
 ```
 
 Get the created file:
@@ -136,12 +142,20 @@ Get the created file:
 $ curl -s $ALB_DNS/files -H "Host: linuxtips.mydomain.fake" | jq
 {
   "files": [
-    "fec549f2-1aa8-4b85-acd2-9964440f15f7.txt"
+    "6fa876f3-6c93-49b7-9c92-8aac96b5871e.txt",
+    "9d401f1c-5f19-4896-91ab-e3952827bdf1.txt",
+    "de4255c2-ddb0-46e0-ac09-dadc56581365.txt"
   ]
 }
 
-$ curl -s $ALB_DNS/files/d5c4676c-d1aa-4a5d-978c-18f7f7deb960 -H "Host: linuxtips.mydomain.fake"
+$ curl -s $ALB_DNS/files/6fa876f3-6c93-49b7-9c92-8aac96b5871e -H "Host: linuxtips.mydomain.fake"
 Linux Tips is top!!!
+
+$ curl -s $ALB_DNS/files/9d401f1c-5f19-4896-91ab-e3952827bdf1 -H "Host: linuxtips.mydomain.fake"
+Yet another file
+
+$ curl -s $ALB_DNS/files/de4255c2-ddb0-46e0-ac09-dadc56581365 -H "Host: linuxtips.mydomain.fake"
+RTFM
 ```
 _The files list is always the same for each requistion; that's each ecs task reads from same shared filesystem_
 
