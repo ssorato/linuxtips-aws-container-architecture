@@ -8,10 +8,11 @@ on:
         type: choice
         description: Which day?
         required: true
-        default: day7
+        default: day8
         options:
           - day6
           - day7
+          - day8
 
 env:
   REPOSITORY_PATH: "linuxtips"

@@ -11,6 +11,7 @@ on:
     paths:
       - day6/app/**
       - day7/app/**
+      - day8/app/**
 
 env:
   REPOSITORY_PATH: "linuxtips"
@@ -46,6 +47,7 @@ jobs:
           filters: |
             day6: day6/app/**
             day7: day7/app/**
+            day8: day8/app/**
 
       # To think...
       # steps.filter.outputs.changes is an array and can contains more than one changed day
