@@ -30,7 +30,7 @@ Add the following secrets in the GitHub repository:
 ```bash
 $ export ALB_DNS=<your alb dns name>
 $ curl -s $ALB_DNS/version -H "Host: linuxtips.mydomain.fake"
-v7
+v8
 
 $ curl -s $ALB_DNS/printenv -H "Host: linuxtips.mydomain.fake" | jq | egrep "VAR_FROM|GOOD|FOO"
   "FOO=BAR",
