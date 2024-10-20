@@ -1,0 +1,130 @@
+version: '3'
+
+vars:
+  REPOSITORY_PATH: "linuxtips"
+  APP_NAME: "linuxtips-app"
+  CLUSTER_NAME: "ecs-linuxtips" # format("ecs-%s", var.project_name)
+  TF_ENV_NAME: "dev" # tip - get branch name from cli: git rev-parse --abbrev-ref HEAD
+  GIT_COMMIT_HASH:
+    sh: git rev-parse --short HEAD # used in the image tag
+  AWS_ACCOUNT:
+    sh: aws sts get-caller-identity --query Account --output text
+
+tasks:
+
+  default:
+    desc: "Default task: execute wait_deploy"
+    deps: 
+      - task: wait_deploy
+
+  app-ci:
+    desc: Application CI
+    dir: app
+    cmds:
+      - echo "Application lint"
+      - |-
+        command -v golangci-lint
+        if [ $? -ne 0 ]
+        then
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.1
+        fi
+      - golangci-lint -v run ./... -E errcheck
+
+  infra-ci:
+    desc: Infrastructure CI
+    dir: terraform/ecs_app
+    cmds:
+      - echo "Terraform format and check"
+      - terraform fmt --recursive --check
+      - echo "Terraform init"
+      - terraform init -backend-config=environment/dev/backend.tfvars
+      - echo "Terraform validate"
+      - terraform validate
+  
+  build-push-app:
+    desc: Build application and push container image
+    deps:
+      - task: app-ci
+      - task: infra-ci
+    dir: app
+    cmds:
+      - echo "ECR login"
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin {{.AWS_ACCOUNT}}.dkr.ecr.us-east-1.amazonaws.com
+      - echo "Create ECR if not exists"
+      - |-
+        set +e
+
+        # Check if repository already exists
+        REPO_EXISTS=$(aws ecr describe-repositories --repository-names {{.REPOSITORY_NAME}} 2>&1)
+
+        if [[ $REPO_EXISTS == *"RepositoryNotFoundException"* ]]; then
+          echo "Repository {{.REPOSITORY_NAME}} not found. Creating ..."
+          
+          # Create the repository
+          aws ecr create-repository --repository-name {{.REPOSITORY_NAME}}
+          
+          if [ $? -eq 0 ]; then
+            echo "Repository {{.REPOSITORY_NAME}} created successfully."
+          else
+            echo "Error on creating the repository {{.REPOSITORY_NAME}}."
+            exit 1
+          fi
+        else
+          echo "Repository {{.REPOSITORY_NAME}} already exists."
+        fi
+
+        set -e
+      - echo "Build container image"
+      - docker buildx build --platform linux/amd64 -t app . 
+      - docker tag app:latest {{.AWS_ACCOUNT}}.dkr.ecr.us-east-1.amazonaws.com/{{.REPOSITORY_NAME}}:{{.GIT_COMMIT_HASH}}
+      - echo "Push image to the ECR"
+      - docker push {{.AWS_ACCOUNT}}.dkr.ecr.us-east-1.amazonaws.com/{{.REPOSITORY_NAME}}:{{.GIT_COMMIT_HASH}}
+      - echo "ECR logout"
+      - docker logout {{.AWS_ACCOUNT}}.dkr.ecr.us-east-1.amazonaws.com
+    vars:
+      REPOSITORY_NAME: "{{.REPOSITORY_PATH}}/{{.APP_NAME}}"
+
+  infra-cd:
+    desc: Infrastructure CD
+    dir: terraform/ecs_app
+    deps:
+      - task: build-push-app
+    interactive: true
+    cmds:
+      - |-
+        REPOSITORY_TAG=$(docker inspect --format='{{`{{index .RepoDigests 0}}`}}' {{.AWS_ACCOUNT}}.dkr.ecr.us-east-1.amazonaws.com/{{.REPOSITORY_PATH}}/{{.APP_NAME}}:{{.GIT_COMMIT_HASH}})
+        echo "Terraform init"
+        terraform init -backend-config=environment/{{.TF_ENV_NAME}}/backend.tfvars -var container_image=$REPOSITORY_TAG
+        echo "Terraform plan"
+        terraform plan -var-file=environment/{{.TF_ENV_NAME}}/terraform.tfvars -var container_image=$REPOSITORY_TAG
+        echo -n "Ready? "; read a
+        echo "Terraform apply"
+        terraform apply --auto-approve -var-file=environment/{{.TF_ENV_NAME}}/terraform.tfvars -var container_image=$REPOSITORY_TAG
+
+  wait_deploy:
+    desc: Waiting for deployment to complete
+    deps:
+      - task: infra-cd
+    cmds:
+      - echo "Waiting for deployment to complete"
+      - aws ecs wait services-stable --cluster {{.CLUSTER_NAME}} --services {{.APP_NAME}}
+
+  destroy:
+    desc: Destroy ecs app
+    dir: terraform/ecs_app
+    prompt: Do you want to continue?
+    cmds:
+      - |-
+        REPOSITORY_TAG=$(docker inspect --format='{{`{{index .RepoDigests 0}}`}}' {{.AWS_ACCOUNT}}.dkr.ecr.us-east-1.amazonaws.com/{{.REPOSITORY_PATH}}/{{.APP_NAME}}:{{.GIT_COMMIT_HASH}})
+        terraform destroy -var-file=environment/{{.TF_ENV_NAME}}/terraform.tfvars -auto-approve -var container_image=$REPOSITORY_TAG
+      - rm -rf .terraform.lock.hcl 
+      - rm -rf .terraform
+      - echo "Force delete secret"
+      - aws secretsmanager delete-secret --secret-id linuxtips-app-ecs-task-secret --force-delete-without-recovery
+      - echo "Delete ECR repository"
+      - aws ecr delete-repository --repository-name {{.REPOSITORY_PATH}}/{{.APP_NAME}} --force
+      - cmd: echo
+        silent: true
+      - cmd: echo "Don't forget to clean the ecs and the day1 infrastructure"
+        silent: true
+
