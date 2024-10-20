@@ -73,6 +73,21 @@ jobs:
           AWS_REGION:  ${{ env.AWS_REGION }}
           REPOSITORY_NAME: "${{ env.REPOSITORY_PATH }}/${{ env.APP_NAME }}"
 
+  secret-delete:
+    runs-on: ubuntu-latest
+    name: Delete ECR
+    needs:
+      - infra-cd-destroy
+    steps:
+      - name: Force delete secret
+        run: |
+          aws secretsmanager delete-secret --secret-id linuxtips-app-ecs-task-secret --force-delete-without-recovery
+        env:
+          REPOSITORY_NAME: "${{ env.REPOSITORY_PATH }}/${{ env.APP_NAME }}"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION:  ${{ env.AWS_REGION }}
+  
   ecr-delete:
     runs-on: ubuntu-latest
     name: Delete ECR
