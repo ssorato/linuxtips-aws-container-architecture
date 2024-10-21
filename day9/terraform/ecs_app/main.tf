@@ -3,7 +3,7 @@ data "http" "my_public_ip" {
 }
 
 module "ecs_service" {
-  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//ecs_service?ref=day8"
+  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//ecs_service?ref=day9"
 
   common_tags  = var.common_tags
   project_name = var.project_name
@@ -46,6 +46,7 @@ module "ecs_service" {
       file_system_id = aws_efs_file_system.main.id
     }
   )]
+  service_discovery_namespace = data.aws_ssm_parameter.service_discovery_namespace.value
 
   depends_on = [aws_efs_mount_target.efs_mount_subnet]
 

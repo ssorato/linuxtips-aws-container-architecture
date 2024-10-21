@@ -98,3 +98,5 @@ efs_volumes = [
     read_only        = false
   }
 ]
+
+ssm_service_discovery_namespace = "/linuxtips/ecs/cloudmap/namespace"

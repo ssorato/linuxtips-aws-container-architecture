@@ -114,3 +114,9 @@ variable "efs_volumes" {
   }))
   description = "EFS volume used in the ECS tasks"
 }
+
+variable "ssm_service_discovery_namespace" {
+  type        = string
+  description = "Service Discovery namespace id from AWS Systems Manager Parameter Store"
+  default     = null
+}
