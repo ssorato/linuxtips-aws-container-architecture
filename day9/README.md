@@ -175,6 +175,10 @@ linuxtips-app
 pudim
 ```
 
+## ECS health-api application 
+
+See [README](terraform/ecs_health_api_lab/README.md)
+
 ## Cleanup
 
 ### ECS pudim application

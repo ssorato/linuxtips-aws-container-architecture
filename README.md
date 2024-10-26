@@ -19,3 +19,4 @@ IaC using:
 | [Day 6](day6/README.md) | ECS demo application using GitHub Actions                      |
 | [Day 7](day7/README.md) | ECS demo application using EFS                                 |
 | [Day 8](day8/README.md) | ECS demo application with Parameters Store and Secrets Manager |
+| [Day 9](day9/README.md) | ECS with internal ALB, advance routing and Service Discover    |
