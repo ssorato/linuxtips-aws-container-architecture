@@ -17,11 +17,9 @@ module "bmr" {
     task_desired = 1
   }
 
-
   container_image = "fidelissauro/bmr-grpc-service:latest"
 
-  alb_listener_arn = data.aws_ssm_parameter.listener_internal.value
-  alb_arn          = data.aws_ssm_parameter.alb_internal.value
+  use_lb = false
 
   service_task_execution_role_arn = aws_iam_role.main.arn
 

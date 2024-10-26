@@ -21,7 +21,7 @@ Create an environment with distributed communication between several internal an
 ![v1](.github/assets/health-api.png)
 
 ```bash
-$ export ALB_DNS<your external ALB dns>
+$ export ALB_DNS=<your external ALB dns>
 
 $ curl -s  -H "Host: health.linuxtips.demo" $ALB_DNS/version
 {"application":"health-api","version":"v1"}
@@ -37,7 +37,7 @@ $ curl -s  -H "Host: health.linuxtips.demo" \
 }' $ALB_DNS/calculator | jq .
 
 {
-  "id": "5ef392c2-1870-4c5f-a1b0-00288b479a0b",
+  "id": "cc0af440-3f85-4f23-9909-da15015bc5ef",
   "status": 200,
   "imc": {
     "result": 28.72737719046251,

@@ -19,8 +19,7 @@ module "imc" {
 
   container_image = "fidelissauro/imc-grpc-service:latest"
 
-  alb_listener_arn = data.aws_ssm_parameter.listener_internal.value
-  alb_arn          = data.aws_ssm_parameter.alb_internal.value
+  use_lb = false
 
   service_task_execution_role_arn = aws_iam_role.main.arn
 
