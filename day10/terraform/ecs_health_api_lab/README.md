@@ -4,7 +4,7 @@ Original code: [msfidelis/linuxtips-curso-containers-ecs-health-api-lab](https:/
 
 ## Terraform apply
 
-Create the files: `environment/dev/backend.tfvars`:
+Create the file: `environment/dev/backend.tfvars`:
 
 ```tf
 bucket         = "<tfstate bucket name>"
