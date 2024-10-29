@@ -4,6 +4,15 @@ Original code: [msfidelis/linuxtips-curso-containers-ecs-health-api-lab](https:/
 
 ## Terraform apply
 
+Create the files: `environment/dev/backend.tfvars`:
+
+```tf
+bucket         = "<tfstate bucket name>"
+key            = "<tfstate bucket key>"
+dynamodb_table = "<tfstate lock dynamodb table name>"
+region         = "<bucket and dynamodb region>"
+```
+
 ```bash
 $ terraform init -backend-config=environment/dev/backend.tfvars
 $ terraform validate
