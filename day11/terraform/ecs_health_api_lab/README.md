@@ -111,10 +111,29 @@ done
 
 Notice the message `Too Many Requests` due to rate limit.
 
+### API Gateway custom domain name
+
+Register in your external DNS a new record type _CNAME_ with value the `$API_GW_DOMAIN_NAME`
+
+```bash
+$ curl -s  -X POST \
+-H 'Content-Type: application/json' \
+-H "x-api-key: $API_KEY" \
+--data-raw '{ 
+   "age": 26,
+   "weight": 90.0,
+   "height": 1.77,
+   "gender": "M", 
+   "activity_intensity": "very_active"
+}' https://$API_CUSTOM_DOMAIN_NAME/v1/calculator | jq .
+```
+
+
+
 ## Terraform destroy
 
 ```bash
-$ terraform destroy
+$ terraform destroy -var-file=environment/dev/terraform.tfvars
 $ rm -r .terraform.lock.hcl 
 $ rm -rf .terraform
 $ cd ../..
