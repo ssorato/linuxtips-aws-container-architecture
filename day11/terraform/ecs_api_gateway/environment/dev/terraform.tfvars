@@ -9,5 +9,5 @@ project_name = "linuxtips"
 environment = "dev"
 vpc_link    = "/linuxtips/ecs/vpc-link/id"
 
-base_mapping            = "v1"
+base_mapping = "v1"
 

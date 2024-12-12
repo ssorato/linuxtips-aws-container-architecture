@@ -61,12 +61,12 @@ variable "ecs_service" {
 
 variable "common_scale" {
   type = object({
-    scale_type   = optional(string,null)
+    scale_type   = optional(string, null)
     task_maximum = number
     task_minimum = number
     task_desired = number
-    in_cooldown  = optional(number,null)
-    out_cooldown = optional(number,null)
+    in_cooldown  = optional(number, null)
+    out_cooldown = optional(number, null)
   })
   description = "Common scale parameters"
 }
@@ -87,7 +87,7 @@ variable "cloudwatch_scale" {
     in_evaluation_periods   = number
   })
   description = "Cloudwatch scale parameters"
-  default     = {
+  default = {
     out_statistic           = null
     out_cpu_threshold       = null
     out_adjustment          = null
