@@ -19,3 +19,4 @@ Instructor: [Matheus Fidelis](https://linktr.ee/fidelissauro)
 | [Day 9](day9/README.md)   | ECS with internal ALB, advance routing and Service Discover    |
 | [Day 10](day10/README.md) | ECS with Service Connect                                       |
 | [Day 11](day11/README.md) | ECS with API Gateway                                           |
+| [Day 12](day12/README.md) | ECS with CodeDeploy                                            |
