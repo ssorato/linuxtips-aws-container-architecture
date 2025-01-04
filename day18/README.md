@@ -18,6 +18,7 @@ Create the files:
 Terraform:
 
 ```bash
+$ cd terraform/eks-networking
 $ terraform init -backend-config=environment/dev/backend.tfvars
 $ terraform validate
 $ terraform plan -var-file=environment/dev/terraform.tfvars
@@ -30,6 +31,7 @@ Cleanup:
 $ terraform destroy -var-file=environment/dev/terraform.tfvars
 $ rm -r .terraform.lock.hcl 
 $ rm -rf .terraform
+$ cd ..
 ```
 
 
