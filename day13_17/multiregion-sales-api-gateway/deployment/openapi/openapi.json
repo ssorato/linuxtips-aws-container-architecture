@@ -1,0 +1,202 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Sales API",
+    "description": "API for sales management.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.yourdomain.com"
+    }
+  ],
+  "paths": {
+    "/sales": {
+      "post": {
+        "summary": "Create a sale",
+        "description": "Create a new sale with the data provided.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "product": {
+                    "type": "string",
+                    "description": "Product name.",
+                    "example": "The Little Prince"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Product value.",
+                    "example": 14
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sale created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique sales ID.",
+                      "example": "9839a2c9-ca50-44ea-8590-c325a717ea5c"
+                    },
+                    "product": {
+                      "type": "string",
+                      "description": "Product name.",
+                      "example": "The Little Prince"
+                    },
+                    "amount": {
+                      "type": "number",
+                      "format": "float",
+                      "description": "Product value.",
+                      "example": 14
+                    },
+                    "processed": {
+                      "type": "boolean",
+                      "description": "Indicates whether the sale was processed.",
+                      "example": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "201"
+            }
+          },
+          "httpMethod": "POST",
+          "type": "http_proxy",
+          "uri": "http://sales-api.sales-cluster.internal.com/sales",
+          "passthroughBehavior": "WHEN_NO_MATCH",
+          "connectionType": "VPC_LINK",
+          "connectionId": "${stageVariables.vpcLinkId}"
+        }
+      }
+    },
+    "/sales/{id}": {
+      "get": {
+        "summary": "Consult sale",
+        "description": "Returns details of a sale based on ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "9839a2c9-ca50-44ea-8590-c325a717ea5c"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sale details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique sales ID.",
+                      "example": "9839a2c9-ca50-44ea-8590-c325a717ea5c"
+                    },
+                    "product": {
+                      "type": "string",
+                      "description": "Product name.",
+                      "example": "The Little Prince"
+                    },
+                    "amount": {
+                      "type": "number",
+                      "format": "float",
+                      "description": "Product value.",
+                      "example": 14
+                    },
+                    "processed": {
+                      "type": "boolean",
+                      "description": "Indicates whether the sale was processed.",
+                      "example": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sale not found."
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.path.id": "method.request.path.id"
+          },
+          "httpMethod": "GET",
+          "type": "http_proxy",
+          "uri": "http://sales-api.sales-cluster.internal.com/sales/{id}",
+          "passthroughBehavior": "WHEN_NO_MATCH",
+          "connectionType": "VPC_LINK",
+          "connectionId": "${stageVariables.vpcLinkId}"
+        }
+      },
+      "delete": {
+        "summary": "Delete a sale",
+        "description": "Remove a sale based on the provided ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "9839a2c9-ca50-44ea-8590-c325a717ea5c"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully deleted sale."
+          },
+          "404": {
+            "description": "Sale not found."
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "204"
+            }
+          },
+          "requestParameters": {
+            "integration.request.path.id": "method.request.path.id"
+          },
+          "httpMethod": "DELETE",
+          "type": "http_proxy",
+          "uri": "http://sales-api.sales-cluster.internal.com/sales/{id}",
+          "passthroughBehavior": "WHEN_NO_MATCH",
+          "connectionType": "VPC_LINK",
+          "connectionId": "${stageVariables.vpcLinkId}"
+        }
+      }
+    }
+  }
+}

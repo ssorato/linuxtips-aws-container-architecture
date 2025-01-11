@@ -1,0 +1,418 @@
+version: '3'
+
+dotenv: ['.env']
+
+tasks:
+  backend:
+    internal: true
+    interactive: true
+    dir: "{{.STEP_FOLDER}}"
+    cmds:
+      - |-
+        cat <<EOT > environment/{{.PROJECT_ENV}}/{{.AWS_REGION}}/backend.tfvars
+        bucket         = "{{.S3_BUCKET_NAME}}"
+        key            = "{{.S3_KEY_ROOT_PATH}}/{{.AWS_REGION}}/{{.TF_STATE_NAME}}.tfstate"
+        dynamodb_table = "{{.DYNAMODB_TABLE_NAME}}"
+        region         = "{{.S3_BUCKET_REGION}}"
+        EOT
+      - echo "Check {{.STEP_FOLDER}}/environment/{{.PROJECT_ENV}}/{{.AWS_REGION}}/backend.tfvars. {{if .CONFIRM}}Do you want to continue?"; read a{{else}}"{{end}}
+
+  plan_infra:
+    internal: true
+    dir: "{{.STEP_FOLDER}}"
+    cmds:
+      - task: backend
+        vars:
+          STEP_FOLDER: "{{.STEP_FOLDER}}"
+          TF_STATE_NAME: "{{.TF_STATE_NAME}}"
+          AWS_REGION: "{{.AWS_REGION}}"
+          CONFIRM: 
+            ref: .CONFIRM
+      - echo "Plan about {{.STEP_FOLDER}} and {{.TF_STATE_NAME}} state on region {{.AWS_REGION}} ..."
+      - rm -rf .terraform # due do multiregion and .terraform/terraform.tfstate
+      - rm -rf .terraform.lock.hcl
+      - terraform init -backend-config=environment/{{.PROJECT_ENV}}/{{.AWS_REGION}}/backend.tfvars --upgrade
+      - terraform validate
+      - terraform plan -var-file=environment/{{.PROJECT_ENV}}/{{.AWS_REGION}}/terraform.tfvars
+
+  create_infra:
+    internal: true
+    interactive: true
+    dir: "{{.STEP_FOLDER}}"
+    cmds:
+      - task: plan_infra
+        vars:
+          STEP_FOLDER: "{{.STEP_FOLDER}}"
+          TF_STATE_NAME: "{{.TF_STATE_NAME}}"
+          AWS_REGION: "{{.AWS_REGION}}"
+          CONFIRM:
+            ref: .CONFIRM
+      - echo "Check the plan about {{.STEP_FOLDER}} and {{.TF_STATE_NAME}} state on region {{.AWS_REGION}} ... {{if .CONFIRM}}Do you want to continue?"; read a{{else}}"{{end}}
+      - terraform apply -var-file=environment/{{.PROJECT_ENV}}/{{.AWS_REGION}}/terraform.tfvars -auto-approve
+
+  destroy_infra:
+    internal: true
+    #prompt: Do you want to continue?
+    dir: "{{.STEP_FOLDER}}"
+    interactive: true
+    cmds:
+      - task: backend
+        vars:
+          STEP_FOLDER: "{{.STEP_FOLDER}}"
+          TF_STATE_NAME: "{{.TF_STATE_NAME}}"
+          AWS_REGION: "{{.AWS_REGION}}"
+      - rm -rf .terraform # due do multiregion and .terraform/terraform.tfstate
+      - rm -rf .terraform.lock.hcl
+      - terraform init -backend-config=environment/{{.PROJECT_ENV}}/{{.AWS_REGION}}/backend.tfvars --upgrade
+      - echo "Destroy about {{.STEP_FOLDER}} and {{.TF_STATE_NAME}} on region {{.AWS_REGION}} ..."
+      - terraform destroy -var-file=environment/{{.PROJECT_ENV}}/{{.AWS_REGION}}/terraform.tfvars -auto-approve
+      - rm -rf .terraform # due do multiregion and .terraform/terraform.tfstate
+      - rm -rf .terraform.lock.hcl
+
+  deploy:
+    internal: true
+    dir: "{{.FOLDER}}/{{.STEP}}"
+    cmds:
+      - task: create_infra
+        vars:
+          STEP_FOLDER: "{{.FOLDER}}/{{.STEP}}"
+          TF_STATE_NAME: "{{.FOLDER}}-{{.STEP}}"
+          AWS_REGION: "{{.AWS_REGION}}"
+          CONFIRM:
+            ref: .CONFIRM
+
+  destroy:
+    internal: true
+    dir: "{{.FOLDER}}/{{.STEP}}"
+    cmds:
+      - task: destroy_infra
+        vars:
+          STEP_FOLDER: "{{.FOLDER}}/{{.STEP}}"
+          TF_STATE_NAME: "{{.FOLDER}}-{{.STEP}}"
+          AWS_REGION: "{{.AWS_REGION}}"
+
+  create_multiregion_vpc:
+    desc: Create AWS multiregion vpc
+    cmds:
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-vpc"
+          STEP: "pre-deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-vpc"
+          STEP: "deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-vpc"
+          STEP: "deployment"
+          AWS_REGION: "secondary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-vpc"
+          STEP: "post-deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+
+  destroy_multiregion_vpc:
+    desc: Destroy AWS multiregion vpc
+    cmds:
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-vpc"
+          STEP: "post-deployment"
+          AWS_REGION: "primary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-vpc"
+          STEP: "deployment"
+          AWS_REGION: "secondary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-vpc"
+          STEP: "deployment"
+          AWS_REGION: "primary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-vpc"
+          STEP: "pre-deployment"
+          AWS_REGION: "primary"
+
+  create_multiregion_cluster:
+    desc: Create AWS multiregion cluster
+    cmds:
+      - sed -i '' 's/yourdomain.com/{{.YOUR_DOMAIN}}/' multiregion-cluster/deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+      - sed -i '' 's/yourdomain.com/{{.YOUR_DOMAIN}}/' multiregion-cluster/deployment/environment/{{.PROJECT_ENV}}/secondary/terraform.tfvars
+      - sed -i '' 's/yourdomain.com/{{.YOUR_DOMAIN}}/' multiregion-cluster/pre-deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+      - sed -i '' 's/your_hosted_zone_id/{{.YOUR_DOMAIN_HOSTED_ZONE_ID}}/' multiregion-cluster/pre-deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-cluster"
+          STEP: "pre-deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-cluster"
+          STEP: "deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-cluster"
+          STEP: "deployment"
+          AWS_REGION: "secondary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-cluster"
+          STEP: "post-deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-cluster"
+          STEP: "post-deployment"
+          AWS_REGION: "secondary"
+          CONFIRM: false
+
+  destroy_multiregion_cluster:
+    desc: Destroy AWS multiregion cluster
+    cmds:
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-cluster"
+          STEP: "post-deployment"
+          AWS_REGION: "secondary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-cluster"
+          STEP: "post-deployment"
+          AWS_REGION: "primary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-cluster"
+          STEP: "deployment"
+          AWS_REGION: "secondary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-cluster"
+          STEP: "deployment"
+          AWS_REGION: "primary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-cluster"
+          STEP: "pre-deployment"
+          AWS_REGION: "primary"
+      - |-
+        sed -i '' 's/{{.YOUR_DOMAIN}}/yourdomain.com/' multiregion-cluster/deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+        sed -i '' 's/{{.YOUR_DOMAIN}}/yourdomain.com/' multiregion-cluster/deployment/environment/{{.PROJECT_ENV}}/secondary/terraform.tfvars
+        sed -i '' 's/{{.YOUR_DOMAIN}}/yourdomain.com/' multiregion-cluster/pre-deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+        sed -i '' 's/{{.YOUR_DOMAIN_HOSTED_ZONE_ID}}/your_hosted_zone_id/' multiregion-cluster/pre-deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+
+  create_multiregion_routing:
+    desc: Create AWS multiregion routing ( global accelerator )
+    cmds:
+      - |-
+        sed -i '' 's/yourdomain.com/{{.YOUR_DOMAIN}}/' multiregion-routing/post-deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+        sed -i '' 's/your_hosted_zone_id/{{.YOUR_DOMAIN_HOSTED_ZONE_ID}}/' multiregion-routing/post-deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-routing"
+          STEP: "pre-deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-routing"
+          STEP: "deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-routing"
+          STEP: "deployment"
+          AWS_REGION: "secondary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-routing"
+          STEP: "post-deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+
+  destroy_multiregion_routing:
+    desc: Destroy AWS multiregion routing ( global accelerator )
+    cmds:
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-routing"
+          STEP: "post-deployment"
+          AWS_REGION: "primary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-routing"
+          STEP: "deployment"
+          AWS_REGION: "secondary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-routing"
+          STEP: "deployment"
+          AWS_REGION: "primary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-routing"
+          STEP: "pre-deployment"
+          AWS_REGION: "primary"
+      - |-
+        sed -i '' 's/{{.YOUR_DOMAIN}}/yourdomain.com/' multiregion-routing/post-deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+        sed -i '' 's/{{.YOUR_DOMAIN_HOSTED_ZONE_ID}}/your_hosted_zone_id/' multiregion-routing/post-deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+
+  create_multiregion_sales_workload:
+    desc: Create AWS multiregion sales workload ( api and work ecs services )
+    cmds:
+      - |-
+        sed -i '' 's/yourdomain.com/{{.YOUR_DOMAIN}}/' multiregion-sales-workload/deployment/environment/dev/primary/terraform.tfvars
+        sed -i '' 's/yourdomain.com/{{.YOUR_DOMAIN}}/' multiregion-sales-workload/deployment/environment/dev/secondary/terraform.tfvars
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-sales-workload"
+          STEP: "pre-deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-sales-workload"
+          STEP: "deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-sales-workload"
+          STEP: "deployment"
+          AWS_REGION: "secondary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-sales-workload"
+          STEP: "post-deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+
+  destroy_multiregion_sales_workload:
+    desc: Destroy AWS multiregion sales workload ( api and work ecs services )
+    cmds:
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-sales-workload"
+          STEP: "post-deployment"
+          AWS_REGION: "primary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-sales-workload"
+          STEP: "deployment"
+          AWS_REGION: "secondary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-sales-workload"
+          STEP: "deployment"
+          AWS_REGION: "primary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-sales-workload"
+          STEP: "pre-deployment"
+          AWS_REGION: "primary"
+      - |-
+        sed -i '' 's/{{.YOUR_DOMAIN}}/yourdomain.com/' multiregion-sales-workload/deployment/environment/dev/primary/terraform.tfvars
+        sed -i '' 's/{{.YOUR_DOMAIN}}/yourdomain.com/' multiregion-sales-workload/deployment/environment/dev/secondary/terraform.tfvars
+
+  create_multiregion_sales_api_gateway:
+    desc: Create AWS multiregion sales api gateway
+    cmds:
+      - |-
+        sed -i '' 's/yourdomain.com/{{.YOUR_DOMAIN}}/' multiregion-sales-api-gateway/deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+        sed -i '' 's/yourdomain.com/{{.YOUR_DOMAIN}}/' multiregion-sales-api-gateway/deployment/environment/{{.PROJECT_ENV}}/secondary/terraform.tfvars
+        sed -i '' 's/your_hosted_zone_id/{{.YOUR_DOMAIN_HOSTED_ZONE_ID}}/' multiregion-sales-api-gateway/deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+        sed -i '' 's/your_hosted_zone_id/{{.YOUR_DOMAIN_HOSTED_ZONE_ID}}/' multiregion-sales-api-gateway/deployment/environment/{{.PROJECT_ENV}}/secondary/terraform.tfvars
+        sed -i '' 's/yourdomain.com/{{.YOUR_DOMAIN}}/' multiregion-sales-api-gateway/post-deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+        sed -i '' 's/your_hosted_zone_id/{{.YOUR_DOMAIN_HOSTED_ZONE_ID}}/' multiregion-sales-api-gateway/post-deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+        sed -i '' 's/yourdomain.com/{{.YOUR_DOMAIN}}/' multiregion-sales-api-gateway/deployment/openapi/openapi.json
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-sales-api-gateway"
+          STEP: "pre-deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-sales-api-gateway"
+          STEP: "deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-sales-api-gateway"
+          STEP: "deployment"
+          AWS_REGION: "secondary"
+          CONFIRM: false
+      - task: deploy
+        vars:
+          FOLDER: "multiregion-sales-api-gateway"
+          STEP: "post-deployment"
+          AWS_REGION: "primary"
+          CONFIRM: false
+
+  destroy_multiregion_sales_api_gateway:
+    desc: Destroy AWS multiregion sales api gateway
+    cmds:
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-sales-api-gateway"
+          STEP: "post-deployment"
+          AWS_REGION: "primary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-sales-api-gateway"
+          STEP: "deployment"
+          AWS_REGION: "secondary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-sales-api-gateway"
+          STEP: "deployment"
+          AWS_REGION: "primary"
+      - task: destroy
+        vars:
+          FOLDER: "multiregion-sales-api-gateway"
+          STEP: "pre-deployment"
+          AWS_REGION: "primary"
+      - |-
+        sed -i '' 's/{{.YOUR_DOMAIN}}/yourdomain.com/' multiregion-sales-api-gateway/deployment/openapi/openapi.json
+        sed -i '' 's/{{.YOUR_DOMAIN}}/yourdomain.com/' multiregion-sales-api-gateway/deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+        sed -i '' 's/{{.YOUR_DOMAIN}}/yourdomain.com/' multiregion-sales-api-gateway/deployment/environment/{{.PROJECT_ENV}}/secondary/terraform.tfvars
+        sed -i '' 's/{{.YOUR_DOMAIN_HOSTED_ZONE_ID}}/your_hosted_zone_id/' multiregion-sales-api-gateway/deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+        sed -i '' 's/{{.YOUR_DOMAIN_HOSTED_ZONE_ID}}/your_hosted_zone_id/' multiregion-sales-api-gateway/deployment/environment/{{.PROJECT_ENV}}/secondary/terraform.tfvars
+        sed -i '' 's/{{.YOUR_DOMAIN}}/yourdomain.com/' multiregion-sales-api-gateway/post-deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+        sed -i '' 's/{{.YOUR_DOMAIN_HOSTED_ZONE_ID}}/your_hosted_zone_id/' multiregion-sales-api-gateway/post-deployment/environment/{{.PROJECT_ENV}}/primary/terraform.tfvars
+
+  create_multiregion:
+    desc: Create AWS multiregion
+    cmds:
+      - task: create_multiregion_vpc
+      - task: create_multiregion_cluster
+      - task: create_multiregion_routing
+      - task: create_multiregion_sales_workload
+      - task: create_multiregion_sales_api_gateway
+
+  destroy_multiregion:
+    desc: Destroy AWS multiregion
+    cmds:
+      - task: destroy_multiregion_sales_api_gateway
+      - task: destroy_multiregion_sales_workload
+      - task: destroy_multiregion_routing
+      - task: destroy_multiregion_cluster
+      - task: destroy_multiregion_vpc
