@@ -17,3 +17,8 @@ output "database_subnets" {
   value       = module.esk-networking.database_subnets
   description = "SSM Parameters about database subnets id"
 }
+
+output "natgw_eips" {
+  value       = module.esk-networking.natgw_eips
+  description = "SSM Parameters about natgw eips id"
+}
