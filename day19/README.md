@@ -29,16 +29,6 @@ terraform apply -var-file=environment/dev/terraform.tfvars
 cd ../..
 ```
 
-## Cleanup
-
-```bash
-cd terraform/eks-vanilla
-terraform destroy -var-file=environment/dev/terraform.tfvars
-rm -r .terraform.lock.hcl 
-rm -rf .terraform
-cd ../..
-```
-
 ## Kubeconfig
 
 ```bash
@@ -49,9 +39,38 @@ kubectl cluster-info
 kubectl get nodes
 ```
 
+### EKS access entries
+
+```bash
+aws eks list-access-policies --output table
+
+aws eks list-access-entries --cluster-name linuxtips-cluster
+
+aws eks describe-access-entry --cluster-name linuxtips-cluster --principal-arn <arn>
+
+aws eks list-associated-access-policies --cluster-name linuxtips-cluster --principal <arn>
+```
+
 ## First deployment
 
 ```bash
 kubectl apply -f chip.yaml
 kubectl -n chip get all
 ```
+
+## Cleanup
+
+```bash
+cd terraform/eks-vanilla
+terraform destroy -var-file=environment/dev/terraform.tfvars
+rm -r .terraform.lock.hcl 
+rm -rf .terraform
+cd ../..
+```
+
+## References
+
+[Grant IAM users access to Kubernetes with EKS access entries](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html)
+
+[AWS EKS – Part 20 – Authentication and Authorization with Access Entries](https://kubedemy.io/aws-eks-part-20-authentication-and-authorization-with-access-entries)
+
