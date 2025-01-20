@@ -4,13 +4,13 @@
 
 ## VPC Networking
 
-Create the files:
+Create the files ( we are using [S3-native state locking](https://github.com/hashicorp/terraform/pull/35661) instead of DynamoDB table ):
 * `environment/dev/backend.tfvars`:
   ```tf
   bucket         = "<tfstate bucket name>"
   key            = "<tfstate bucket key>"
-  dynamodb_table = "<tfstate lock dynamodb table name>"
-  region         = "<bucket and dynamodb region>"
+  use_lockfile   = true
+  region         = "<bucket region>"
   ```
 * `environment/dev/terraform.tfvars`:
   * your terraform variables values
