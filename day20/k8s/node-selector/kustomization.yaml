@@ -1,0 +1,13 @@
+resources:
+  - ../base
+
+patches:
+  - target:
+      kind: Deployment
+      name: chip
+    patch: |-
+      - op: add
+        path: "/spec/template/spec/nodeSelector"
+        value:
+          capacity/arch: x86_64
+          capacity/type: ON_DEMAND

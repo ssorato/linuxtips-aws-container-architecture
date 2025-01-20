@@ -1,0 +1,31 @@
+resources:
+  - ../base
+
+patches:
+  - target:
+      kind: Deployment
+      name: chip
+    patch: |-
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value:
+          capacity/arch: x86_64
+      - op: add
+        path: /spec/template/spec/affinity
+        value:
+          nodeAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 50
+              preference:
+                matchExpressions:
+                - key: capacity/type
+                  operator: In
+                  values:
+                  - SPOT
+            - weight: 50 
+              preference:
+                matchExpressions:
+                - key: capacity/type
+                  operator: In
+                  values:
+                  - ON_DEMAND
