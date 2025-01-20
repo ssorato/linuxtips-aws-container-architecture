@@ -23,3 +23,4 @@ Instructor: [Matheus Fidelis](https://linktr.ee/fidelissauro)
 | [Day 13-17](day13_17/README.md)   | ECS final project multi-region                                      |
 | [Day 18](day18/README.md)         | Elastic Kubernetes Service - Overview, Inital setups and Networking |
 | [Day 19](day19/README.md)         | Elastic Kubernetes Service - Vanilla cluster minimal setup          |
+| [Day 20](day20/README.md)         | Elastic Kubernetes Service - Node groups and Cluster Autoscaler     |
