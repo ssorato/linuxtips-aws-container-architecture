@@ -25,3 +25,4 @@ Instructor: [Matheus Fidelis](https://linktr.ee/fidelissauro)
 | [Day 19](day19/README.md)         | Elastic Kubernetes Service - Vanilla cluster minimal setup          |
 | [Day 20](day20/README.md)         | Elastic Kubernetes Service - Node groups and Cluster Autoscaler     |
 | [Day 21](day21/README.md)         | Elastic Kubernetes Service - Cluster full Fargate                   |
+| [Day 22](day22/README.md)         | Elastic Kubernetes Service - Karpenter                              |
