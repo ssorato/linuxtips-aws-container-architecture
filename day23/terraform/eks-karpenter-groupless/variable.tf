@@ -4,8 +4,8 @@ variable "common_tags" {
   default = {
     created_by = "terraform-linuxtips-aws-container-architecture"
     sandbox    = "linuxtips"
-    day        = "day22"
-    step       = "eks-karpenter"
+    day        = "day23"
+    step       = "eks-karpenter-groupless"
   }
 }
 
