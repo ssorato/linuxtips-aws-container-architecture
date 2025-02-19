@@ -27,3 +27,4 @@ Instructor: [Matheus Fidelis](https://linktr.ee/fidelissauro)
 | [Day 21](day21/README.md)         | Elastic Kubernetes Service - Cluster full Fargate                    |
 | [Day 22](day22/README.md)         | Elastic Kubernetes Service - Karpenter                               |
 | [Day 23](day23/README.md)         | Elastic Kubernetes Service - Karpenter groupless and Fargate profile |
+| [Day 24](day24/README.md)         | Elastic Kubernetes Service - AWS Load Balancer Controller            |
