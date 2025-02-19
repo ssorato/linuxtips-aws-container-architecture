@@ -176,7 +176,7 @@ Set the variable `create_nlb` as `true` in the [`terraform.tfvars`](terraform/ek
 
 Deploy again _day24_ infrastructure ( see above [Deploy EKS with AWS Load Balancer Controller](#deploy-eks-with-aws-load-balancer-controller) )
 
-Review the [`chip_tgb_acm.yaml`](chip_tgb_acm.yaml) file.
+Review the [`chip_tgb.yaml`](chip_tgb.yaml) file.
 
 ```bash
 kubectl apply -f chip_tgb.yaml
