@@ -174,7 +174,9 @@ See [TargetGroupBinding](https://kubernetes-sigs.github.io/aws-load-balancer-con
 
 Set the variable `create_nlb` as `true` in the [`terraform.tfvars`](terraform/eks-albc/environment/dev/terraform.tfvars)
 
-Deploy again _day24_ infrastructure ( see above [#deploy-eks-with-aws-load-balancer-controller](Deploy EKS with AWS Load Balancer Controller) )
+Deploy again _day24_ infrastructure ( see above [Deploy EKS with AWS Load Balancer Controller](#deploy-eks-with-aws-load-balancer-controller) )
+
+Review the [`chip_tgb_acm.yaml`](chip_tgb_acm.yaml) file.
 
 ```bash
 kubectl apply -f chip_tgb.yaml
