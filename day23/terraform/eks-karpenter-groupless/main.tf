@@ -3,7 +3,7 @@ data "http" "myip" {
 }
 
 module "eks-karpenter-groupless" {
-  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//eks-karpenter-groupless?ref=day23"
+  source      = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//eks-karpenter-groupless?ref=day23"
   common_tags = var.common_tags
 
   project_name = var.project_name

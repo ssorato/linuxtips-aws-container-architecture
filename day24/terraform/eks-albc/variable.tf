@@ -77,7 +77,7 @@ variable "route53" {
 }
 
 variable "create_nlb" {
-  type = bool
+  type        = bool
   description = "Create a NLB used by AWS load balancer controller and TargetGroupBinding"
-  default = false
+  default     = false
 }
