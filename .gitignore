@@ -47,3 +47,5 @@ terraform.rc
 .env
 /Taskfile.yaml
 
+# Others
+max-pods-calculator.sh
