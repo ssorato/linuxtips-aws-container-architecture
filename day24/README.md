@@ -1,5 +1,7 @@
 # Linuxtips course: Elastic Kubernetes Service - AWS Load Balancer Controller
 
+![controller-design](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/assets/images/controller-design.png)
+
 ## Requirements
 
 * the [day 18](../day18/README.md) EKS networking
