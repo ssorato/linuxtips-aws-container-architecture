@@ -218,7 +218,7 @@ done
 
 ## References
 
-[AWS Load Balancer Controller](hhttps://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/)
+[AWS Load Balancer Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/)
 
 
 
