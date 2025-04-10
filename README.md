@@ -33,3 +33,4 @@ Instructor: [Matheus Fidelis](https://linktr.ee/fidelissauro)
 | [Day 27](day27/README.md)         | Elastic Kubernetes Service - External Secrets with AWS Secrets Manager |
 | [Day 28](day28/README.md)         | Elastic Kubernetes Service - Automode                                  |
 | [Day 29](day29/README.md)         | Elastic Kubernetes Service - kube-prometheus-stack                     |
+| [Day 30](day30/README.md)         | Elastic Kubernetes Service - Istio Service Mesh                        |
