@@ -32,3 +32,4 @@ Instructor: [Matheus Fidelis](https://linktr.ee/fidelissauro)
 | [Day 26](day26/README.md)         | Elastic Kubernetes Service - POD identity, EBS, S3 and EFS CSI addons  |
 | [Day 27](day27/README.md)         | Elastic Kubernetes Service - External Secrets with AWS Secrets Manager |
 | [Day 28](day28/README.md)         | Elastic Kubernetes Service - Automode                                  |
+| [Day 29](day29/README.md)         | Elastic Kubernetes Service - kube-prometheus-stack                     |
