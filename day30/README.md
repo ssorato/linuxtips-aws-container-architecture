@@ -9,19 +9,19 @@
 In this implementation, applications that cannot deal with instability will be managed by Fargate ( namespaces _kube-system_ and _karpenter_ ) ​​and the rest by Karpenter.
 
 Create the files ( we are using [S3-native state locking](https://github.com/hashicorp/terraform/pull/35661) instead of DynamoDB table ):
-* `terraform/eks-prometheus/environment/dev/terraform.tfvars`:
+* `terraform/eks-istio/environment/dev/terraform.tfvars`:
   ```tf
   bucket         = "<tfstate bucket name>"
   key            = "<tfstate bucket key>"
   use_lockfile   = true
   region         = "<bucket region>"
   ```
-* `terraform/eks-prometheus/environment/dev/terraform.tfvars`:
+* `terraform/eks-istio/environment/dev/terraform.tfvars`:
 
 Terraform:
 
 ```bash
-cd terraform/eks-prometheus
+cd terraform/eks-istio
 export MY_WILDCARD_DOMAIN=<your wildcard domain> # *.mydomain.com
 export MY_ROUTE53_HOSTED_ZONEID=<your route53 hosted zone id>
 export TF_VAR_route53="{ dns_name = \"$MY_WILDCARD_DOMAIN$\", hosted_zone = \"$MY_ROUTE53_HOSTED_ZONEID\" }"
@@ -145,7 +145,7 @@ kubectl get nodepool prometheus
 Cleanup: 
 
 ```bash
-cd terraform/eks-prometheus
+cd terraform/eks-istio
 terraform destroy -var-file=environment/dev/terraform.tfvars
 rm -r .terraform.lock.hcl 
 rm -rf .terraform
@@ -155,7 +155,7 @@ cd ../..
 Remove log groups from CloudWatch:
 
 ```bash
-export EKS_NAME=`grep project_name terraform/eks-prometheus/environment/dev/terraform.tfvars | cut -d"=" -f 2 | sed 's/[" ]//g'`
+export EKS_NAME=`grep project_name terraform/eks-istio/environment/dev/terraform.tfvars | cut -d"=" -f 2 | sed 's/[" ]//g'`
 aws logs describe-log-groups --log-group-name-pattern $EKS_NAME --query 'logGroups[*].logGroupName' --output json | jq -r '.[]' |
 while read LOG
 do
