@@ -36,3 +36,4 @@ Instructor: [Matheus Fidelis](https://linktr.ee/fidelissauro)
 | [Day 30](day30/README.md)         | Elastic Kubernetes Service - Istio Service Mesh                        |
 | [Day 31](day31/README.md)         | Elastic Kubernetes Service - Keda Autoscaler                           |
 | [Day 32](day32/README.md)         | Elastic Kubernetes Service - Argo Rollouts                             |
+| [Day 33](day33/README.md)         | Elastic Kubernetes Service - Helm Charts                               |
