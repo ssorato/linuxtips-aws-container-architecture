@@ -1,0 +1,22 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: chip
+  namespace: chip
+spec:
+  hosts:
+  - "chip.chip.svc.cluster.local"
+  - "chip.yourdomain.com"
+  gateways:
+  - chip
+  http:
+  - route:
+    - destination:
+        host: chip
+        port:
+          number: 8080 
+    # retries:
+    #   attempts: 3
+    #   perTryTimeout: 10500ms
+    #   retryOn: 5xx

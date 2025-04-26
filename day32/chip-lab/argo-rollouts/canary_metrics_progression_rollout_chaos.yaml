@@ -1,0 +1,121 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: chip-success-rate
+  namespace: chip
+spec:
+  metrics:
+    - name: success-rate
+      count: 1
+      interval: 30s
+      successCondition: result[0] >= 0.95
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090
+          query: |
+            sum(irate(
+              istio_requests_total{destination_service=~"chip.chip.svc.cluster.local",response_code!~"5.*"}[5m]
+            )) /
+            sum(irate(
+              istio_requests_total{destination_service=~"chip.chip.svc.cluster.local"}[5m]
+            ))
+
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  labels:
+    app: chip
+  name: chip
+  namespace: chip
+spec:
+  # Canary Release Manual
+  revisionHistoryLimit: 3
+  strategy:
+    canary: 
+      steps:
+        - setWeight: 10
+        - pause: {duration: 1m}
+        - analysis:
+            templates:
+              - templateName: chip-success-rate
+        - setWeight: 40
+        - pause: {duration: 2m}
+        - analysis:
+            templates:
+              - templateName: chip-success-rate        
+        - setWeight: 80
+        - pause: {duration: 3m}
+        - analysis:
+            templates:
+              - templateName: chip-success-rate        
+        - setWeight: 100
+  replicas: 10
+  selector:
+    matchLabels:
+      app: chip
+  template:
+    metadata:       
+      labels:
+        app: chip
+        name: chip
+        version: v5
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: "topology.kubernetes.io/zone"
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: chip
+          
+      nodeSelector:
+        karpenter.sh/nodepool: chip-capacity
+
+      containers:
+      - name: chip
+        image: fidelissauro/chip:v1
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi            
+        startupProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /readiness
+            port: 8080
+          periodSeconds: 10
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            httpHeaders:
+            - name: Custom-Header
+              value: Awesome
+            path: /liveness
+            port: 8080
+          periodSeconds: 10
+        env:
+        - name: CHAOS_MONKEY_ENABLED
+          value: "true"  
+        - name: CHAOS_MONKEY_MODE
+          value: "critical" 
+        - name: CHAOS_MONKEY_LATENCY
+          value: "true"            
+        - name: CHAOS_MONKEY_EXCEPTION
+          value: "true"   
+        - name: CHAOS_MONKEY_APP_KILLER
+          value: "true"   
+        - name: CHAOS_MONKEY_MEMORY
+          value: "true"    
+        - name: VERSION
+          value: "v5"                                              
+      terminationGracePeriodSeconds: 60
