@@ -34,3 +34,4 @@ Instructor: [Matheus Fidelis](https://linktr.ee/fidelissauro)
 | [Day 28](day28/README.md)         | Elastic Kubernetes Service - Automode                                  |
 | [Day 29](day29/README.md)         | Elastic Kubernetes Service - kube-prometheus-stack                     |
 | [Day 30](day30/README.md)         | Elastic Kubernetes Service - Istio Service Mesh                        |
+| [Day 31](day31/README.md)         | Elastic Kubernetes Service - Keda Autoscaler                           |

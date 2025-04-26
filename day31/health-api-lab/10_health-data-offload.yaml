@@ -1,0 +1,57 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: health-data-offload
+  name: health-data-offload
+  namespace: nutrition
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: health-data-offload
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+      labels:
+        app: health-data-offload
+        name: health-data-offload
+        version: v1
+    spec:
+      serviceAccountName: nutrition
+      containers:
+      - image: fidelissauro/health-data-offload:latest
+        name: health-data-offload
+        env:
+        - name: ENVIRONMENT
+          value: "dev"
+        - name: WORKERS
+          value: "1"
+        - name: WORKERS_JITTER_MS
+          value: "10000"
+        - name: DATABASE_TYPE
+          value: "dynamodb"
+        - name: DYNAMODB_TABLE
+          value: "linuxtips-cluster-health-data"
+        - name: MESSAGE_TYPE
+          value: "sqs"
+        - name: SQS_QUEUE_URL
+          value: "your_sqs_queue_url"                              
+        ports:
+        - containerPort: 8080
+          name: http   
+        startupProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /healthz
+            port: 8080
+          periodSeconds: 10
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /healthz
+            port: 8080          
+      terminationGracePeriodSeconds: 60

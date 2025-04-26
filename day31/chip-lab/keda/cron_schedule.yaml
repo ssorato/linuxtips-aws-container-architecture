@@ -1,0 +1,18 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: chip-scheduled-spike
+  namespace: chip
+spec:
+  scaleTargetRef:
+    name: chip
+  minReplicaCount: 2
+  maxReplicaCount: 20
+  # cooldownPeriod:  300 # Optional. Default: 300 seconds
+  triggers:
+  - type: cron # https://keda.sh/docs/2.13/scalers/cron/
+    metadata:
+      timezone: America/Sao_Paulo  
+      start: 31 09 * * *       
+      end: 36 09 * * *  # By default the ScaledObject cooldownPeriod is 5 minutes, so it starts at 09:41       
+      desiredReplicas: "10"

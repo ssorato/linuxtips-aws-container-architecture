@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: google.com.br
+  namespace: chip
+spec:
+  hosts:
+  - google.com.br
+  - www.google.com.br
+  - google.com
+  location: MESH_EXTERNAL
+  ports:
+  - number: 443
+    name: https
+    protocol: TLS
+  resolution: DNS
