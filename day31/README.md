@@ -262,6 +262,8 @@ See also [karpenter does not delete aws network interface after scale down #5582
 
 [Set up event-driven auto scaling in Amazon EKS by using Amazon EKS Pod Identity and KEDA](https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/event-driven-auto-scaling-with-eks-pod-identity-and-keda.html)
 
+[[Fargate] [request]: Enable EKS Pod Identities on EKS Fargate  #2274](https://github.com/aws/containers-roadmap/issues/2274)
+
 ## Tip
 
 Validate the POD indentity about _keda-operator_ and SQS quque:
