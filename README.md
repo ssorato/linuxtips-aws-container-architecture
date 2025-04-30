@@ -37,3 +37,4 @@ Instructor: [Matheus Fidelis](https://linktr.ee/fidelissauro)
 | [Day 31](day31/README.md)         | Elastic Kubernetes Service - Keda Autoscaler                           |
 | [Day 32](day32/README.md)         | Elastic Kubernetes Service - Argo Rollouts                             |
 | [Day 33](day33/README.md)         | Elastic Kubernetes Service - Helm Charts                               |
+| [Day 34](day34/README.md)         | Elastic Kubernetes Service - Argo CD and ChartMuseum                   |
