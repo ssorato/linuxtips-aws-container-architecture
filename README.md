@@ -38,3 +38,4 @@ Instructor: [Matheus Fidelis](https://linktr.ee/fidelissauro)
 | [Day 32](day32/README.md)         | Elastic Kubernetes Service - Argo Rollouts                             |
 | [Day 33](day33/README.md)         | Elastic Kubernetes Service - Helm Charts                               |
 | [Day 34](day34/README.md)         | Elastic Kubernetes Service - Argo CD and ChartMuseum                   |
+| [Day 35-38](day35_38/README.md)   | Elastic Kubernetes Service - ArgoCD multiclusters management           |
