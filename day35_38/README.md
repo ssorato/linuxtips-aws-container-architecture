@@ -57,25 +57,68 @@ terraform apply -var-file=environment/dev/terraform.tfvars
 cd ../..
 ```
 
+## Deploy eks control plane ( argo )
+
+Create the files ( we are using [S3-native state locking](https://github.com/hashicorp/terraform/pull/35661) instead of DynamoDB table ):
+* `terraform/eks-control-plane/environment/dev/terraform.tfvars`:
+  ```tf
+  bucket         = "<tfstate bucket name>"
+  key            = "<tfstate bucket key>"
+  use_lockfile   = true
+  region         = "<bucket region>"
+  ```
+* `terraform/eks-control-plane/environment/dev/terraform.tfvars`
+
+Terraform:
+
+```bash
+cd terraform/eks-control-plane
+terraform init -backend-config=environment/dev/backend.tfvars
+terraform validate
+terraform plan -var-file=environment/dev/terraform.tfvars
+terraform apply -var-file=environment/dev/terraform.tfvars
+cd ../..
+```
+
 ## Kubeconfig
 
 ```bash
 aws eks update-kubeconfig --region us-east-1 --name linuxtips-cluster-01 --kubeconfig ~/.kube/linuxtips-cluster --alias linuxtips-cluster-01
 aws eks update-kubeconfig --region us-east-1 --name linuxtips-cluster-02 --kubeconfig ~/.kube/linuxtips-cluster --alias linuxtips-cluster-02
+aws eks update-kubeconfig --region us-east-1 --name linuxtips-control-plane --kubeconfig ~/.kube/linuxtips-cluster --alias linuxtips-control-plane
 
 export KUBECONFIG=~/.kube/linuxtips-cluster
 
 kubectl --context linuxtips-cluster-01 cluster-info 
 kubectl --context linuxtips-cluster-02 cluster-info 
+kubectl --context linuxtips-control-plane cluster-info
 
 kubectl --context linuxtips-cluster-01 get nodes -o wide
 kubectl --context linuxtips-cluster-02 get nodes -o wide
+kubectl --context linuxtips-control-plane get nodes -o wide
 
 helm list -n kube-system --kube-context linuxtips-cluster-01
 helm list -n kube-system --kube-context linuxtips-cluster-02
+helm list -n kube-system --kube-context linuxtips-control-plane 
 ```
 
+Get ArgoCD `admin` password:
+
+```bash
+kubectl --context linuxtips-control-plane -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo
+```
+
+ArgoCD url is `https://argocd.<your domain>`
+
 ## Cleanup
+
+```bash
+cd terraform/eks-control-plane
+terraform destroy -var-file=environment/dev/terraform.tfvars
+rm -r .terraform.lock.hcl 
+rm -rf .terraform
+cd ../..
+```
 
 ```bash
 cd terraform/eks-cluster
@@ -97,8 +140,7 @@ cd ../..
 Remove log groups from CloudWatch:
 
 ```bash
-export EKS_NAME=`grep project_name terraform/eks-cluster/environment/dev/terraform.tfvars | cut -d"=" -f 2 | sed 's/[" ]//g'`
-aws logs describe-log-groups --log-group-name-pattern $EKS_NAME --query 'logGroups[*].logGroupName' --output json | jq -r '.[]' |
+aws logs describe-log-groups --log-group-name-pattern linuxtips --query 'logGroups[*].logGroupName' --output json | jq -r '.[]' |
 while read LOG
 do
   aws logs delete-log-group --log-group-name $LOG
