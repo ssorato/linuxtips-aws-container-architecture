@@ -2,7 +2,7 @@ common_tags = {
   created_by = "terraform-linuxtips-aws-container-architecture"
   sandbox    = "linuxtips"
   day        = "day35_38"
-  step       = "argocd-multiclusters-mgmt"
+  step       = "eks-cluster"
 }
 
 project_name = "linuxtips-cluster"

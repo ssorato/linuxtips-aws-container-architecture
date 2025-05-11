@@ -2,7 +2,7 @@ common_tags = {
   created_by = "terraform-linuxtips-aws-container-architecture"
   sandbox    = "linuxtips"
   day        = "day35_38"
-  step       = "ashared-load-balancer"
+  step       = "shared-load-balancer"
 }
 
 project_name = "linuxtips-ingress"

@@ -71,4 +71,3 @@ variable "karpenter_capacity" {
   }))
 }
 
-
