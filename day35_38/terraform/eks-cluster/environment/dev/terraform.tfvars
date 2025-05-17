@@ -23,6 +23,12 @@ ssm_natgw_eips = [
   "/linuxtips-vpc/subnets/public/us-east-1a/natgw-eip"
 ]
 
+# From shared-load-balancer output
+ssm_target_groups = [
+  "/linuxtips-ingress/cluster-01/listener",
+  "/linuxtips-ingress/cluster-02/listener"
+]
+
 karpenter_capacity = [
   {
     name               = "general"

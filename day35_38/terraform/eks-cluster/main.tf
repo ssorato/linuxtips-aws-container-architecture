@@ -17,7 +17,7 @@ module "eks-cluster01" {
 
   karpenter_capacity = var.karpenter_capacity
 
-  istio_ssm_target_group = "/linuxtips-ingress/cluster-01/listener"
+  istio_ssm_target_group = var.ssm_target_groups[0]
 
 }
 
@@ -36,6 +36,6 @@ module "eks-cluster02" {
 
   karpenter_capacity = var.karpenter_capacity
 
-  istio_ssm_target_group = "/linuxtips-ingress/cluster-02/listener"
+  istio_ssm_target_group = var.ssm_target_groups[1]
 
 }

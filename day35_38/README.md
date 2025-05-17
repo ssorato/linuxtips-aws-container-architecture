@@ -110,6 +110,26 @@ kubectl --context linuxtips-control-plane -n argocd get secret argocd-initial-ad
 
 ArgoCD url is `https://argocd.<your domain>`
 
+## Chip app
+
+Deploy:
+
+```bash
+export MY_DOMAIN=`echo $MY_WILDCARD_DOMAIN | sed 's/*.//'`
+kubectl apply -f chip-argocd-project.yaml
+cat chip-applicationset.yaml | sed "s/yourdomain.com/$MY_DOMAIN/" | kubectl --context linuxtips-control-plane -n argocd apply -f -
+```
+
+Monitor the app version:
+
+```bash
+while true
+do
+  curl -s https://chip.$MY_DOMAIN/version
+  echo
+done
+```
+
 ## Cleanup
 
 ```bash

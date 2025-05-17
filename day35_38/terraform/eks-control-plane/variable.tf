@@ -80,3 +80,11 @@ variable "ssm_acm_arn" {
   type        = string
   description = "The ACM arnfrom AWS SSM parameters"
 }
+
+
+variable "clusters_configs" {
+  type = list(object({
+    cluster_name = string
+  }))
+  description = "The list of EKS clusters to be configured in the ArgoCD"
+}

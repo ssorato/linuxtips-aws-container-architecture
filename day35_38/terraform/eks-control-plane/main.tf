@@ -20,4 +20,6 @@ module "eks-control-plane" {
 
   route53 = var.route53
   ssm_acm_arn = var.ssm_acm_arn
+
+  clusters_configs = var.clusters_configs
 }

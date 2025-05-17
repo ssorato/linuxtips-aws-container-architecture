@@ -21,6 +21,6 @@ ssm_public_subnets = [
 # }
 
 routing_weight = {
-  cluster_01 = 100
-  cluster_02 = 0
+  cluster_01 = 50
+  cluster_02 = 50
 }

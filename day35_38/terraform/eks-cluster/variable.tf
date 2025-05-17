@@ -71,3 +71,7 @@ variable "karpenter_capacity" {
   }))
 }
 
+variable "ssm_target_groups" {
+  type        = list(string)
+  description = "Shared load balancer taget groups from AWS SSM parameters"
+}

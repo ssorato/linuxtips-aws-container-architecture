@@ -42,3 +42,12 @@ karpenter_capacity = [
 ]
 
 ssm_acm_arn = "/linuxtips-ingress/acm/arn"
+
+clusters_configs = [
+  {
+    cluster_name = "linuxtips-cluster-01"
+  },
+  {
+    cluster_name = "linuxtips-cluster-02"
+  }
+]
