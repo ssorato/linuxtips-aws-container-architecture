@@ -3,7 +3,7 @@ data "http" "myip" {
 }
 
 module "eks-cluster01" {
-  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//eks?ref=day_35_38"
+  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//eks?ref=day35"
 
   common_tags = var.common_tags
   project_name = format("%s-01", var.project_name)
@@ -22,7 +22,7 @@ module "eks-cluster01" {
 }
 
 module "eks-cluster02" {
-  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//eks?ref=day_35_38"
+  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//eks?ref=day35"
 
   common_tags = var.common_tags
   project_name = format("%s-02", var.project_name)

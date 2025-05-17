@@ -3,7 +3,7 @@ data "http" "myip" {
 }
 
 module "eks-control-plane" {
-  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//eks-control-plane?ref=day_35_38"
+  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//eks-control-plane?ref=day35"
 
   common_tags = var.common_tags
   project_name = var.project_name

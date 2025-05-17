@@ -3,7 +3,7 @@ data "http" "myip" {
 }
 
 module "share-load-balancer" {
-  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//shared-load-balancer?ref=day_35_38"
+  source = "git::https://github.com/ssorato/linuxtips-aws-container-architecture-tf-modules.git//shared-load-balancer?ref=day35"
 
   common_tags = var.common_tags
   project_name = var.project_name

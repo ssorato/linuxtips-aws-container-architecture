@@ -1,7 +1,7 @@
 common_tags = {
   created_by = "terraform-linuxtips-aws-container-architecture"
   sandbox    = "linuxtips"
-  day        = "day35_38"
+  day        = "day35"
   step       = "eks-control-plane"
 }
 
