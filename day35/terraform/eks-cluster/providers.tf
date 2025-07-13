@@ -31,7 +31,7 @@ provider "kubernetes" {
 
 provider "helm" {
   alias = "cluster01"
-  kubernetes {
+  kubernetes = {
     host                   = module.eks-cluster01.eks_api_endpoint
     cluster_ca_certificate = module.eks-cluster01.cluster_ca_certificate
     token                  = module.eks-cluster01.k8s_token
@@ -55,7 +55,7 @@ provider "kubernetes" {
 
 provider "helm" {
   alias = "cluster02"
-  kubernetes {
+  kubernetes = {
     host                   = module.eks-cluster02.eks_api_endpoint
     cluster_ca_certificate = module.eks-cluster02.cluster_ca_certificate
     token                  = module.eks-cluster02.k8s_token

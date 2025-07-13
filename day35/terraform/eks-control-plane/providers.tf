@@ -31,7 +31,7 @@ provider "kubernetes" {
 
 provider "helm" {
   alias = "cluster-control-plane"
-  kubernetes {
+  kubernetes = {
     host                   = module.eks-control-plane.eks_api_endpoint
     cluster_ca_certificate = module.eks-control-plane.cluster_ca_certificate
     token                  = module.eks-control-plane.k8s_token

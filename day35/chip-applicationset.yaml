@@ -1,3 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: chip
+  namespace: argocd
+spec:
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: '*'
+    server: '*'
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
@@ -16,7 +31,7 @@ spec:
     metadata:
       name: chip-{{shard}}
     spec:
-      project: "default"
+      project: chip
       source:
         repoURL: 'http://chartmuseum.chartmuseum.svc.cluster.local:8080'
         chart: linuxtips

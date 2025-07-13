@@ -168,3 +168,9 @@ done
 ```
 
 Remove the [day 18](../day18/README.md) EKS networking
+
+## References
+
+[Argo Helm Charts](https://github.com/argoproj/argo-helm)
+
+[Removing default ignores of preserveUnknownFields for CRD](https://argo-cd.readthedocs.io/en/stable/operator-manual/upgrading/2.14-3.0/#removing-default-ignores-of-preserveunknownfields-for-crd)
